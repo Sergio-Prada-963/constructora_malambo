@@ -187,12 +187,10 @@ const { DB_HOST = "localhost", DB_PORT = 3306, DB_USER = "root", DB_PASSWORD = "
 		// Insertar PQRs de ejemplo si la tabla está vacía
 		const [pqrRows] = await connection.query("SELECT id FROM pqr LIMIT 1");
 		if (!pqrRows || pqrRows.length === 0) {
-			await connection.query("INSERT INTO pqr (usuario_id, tipo_pqr, estado, consecutivo, fecha, nombre, descripcion) VALUES (?, ?, ?, ?, ?, ?, ?)",
-				[2, 'peticion', 'radicad', 'PQR-1001', new Date(), 'Consulta sobre entrega', 'Quisiera saber fecha de entrega de mi lote.']
-			);
-			console.log('PQRs de ejemplo insertados.');
+			await connection.query("INSERT INTO pqr (usuario_id, tipo_pqr, estado, consecutivo, fecha, nombre, descripcion) VALUES (?, ?, ?, ?, ?, ?, ?)", [2, "peticion", "radicad", "PQR-1001", new Date(), "Consulta sobre entrega", "Quisiera saber fecha de entrega de mi lote."]);
+			console.log("PQRs de ejemplo insertados.");
 		} else {
-			console.log('La tabla pqr ya tiene datos. No se insertaron ejemplos.');
+			console.log("La tabla pqr ya tiene datos. No se insertaron ejemplos.");
 		}
 
 		// Insertar lotes de ejemplo

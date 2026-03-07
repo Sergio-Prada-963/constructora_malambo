@@ -1,81 +1,169 @@
 <!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PQR - Mis Solicitudes</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    body{font-family:Poppins, sans-serif;margin:0;color:#2f3a4d}
-    header{background:#1a1f2b;color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center}
-    .container{padding:28px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
-    .card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.08);padding:12px}
-    .btn{display:inline-block;padding:8px 12px;background:#1a1f2b;color:#fff;border-radius:8px;text-decoration:none}
-    .status{float:right;padding:6px 8px;border-radius:8px;background:#eef2ff;color:#1a1f2b;font-size:12px}
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center}
-    .modal{background:#fff;padding:18px;border-radius:10px;max-width:600px;width:100%}
-    label{display:block;margin-top:8px;font-weight:600}
-    input,textarea,select{width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-top:6px}
-  </style>
-</head>
-<body>
-  <header><h2>PQR</h2><nav><a href="/dashboard.html" style="color:#fff;text-decoration:none">Volver</a></nav></header>
-  <div class="container">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3>Mis PQR</h3>
-      <button id="newBtn" class="btn">Nueva PQR</button>
-    </div>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>PQR - Mis Solicitudes</title>
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+		<style>
+			body {
+				font-family: Poppins, sans-serif;
+				margin: 0;
+				color: #2f3a4d;
+			}
+			header {
+				background: #1a1f2b;
+				color: #fff;
+				padding: 18px 28px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			.container {
+				padding: 28px;
+			}
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+				gap: 16px;
+			}
+			.card {
+				background: #fff;
+				border-radius: 12px;
+				overflow: hidden;
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+				padding: 12px;
+			}
+			.btn {
+				display: inline-block;
+				padding: 8px 12px;
+				background: #1a1f2b;
+				color: #fff;
+				border-radius: 8px;
+				text-decoration: none;
+			}
+			.status {
+				float: right;
+				padding: 6px 8px;
+				border-radius: 8px;
+				background: #eef2ff;
+				color: #1a1f2b;
+				font-size: 12px;
+			}
+			.modal-overlay {
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.5);
+				display: none;
+				align-items: center;
+				justify-content: center;
+			}
+			.modal {
+				background: #fff;
+				padding: 18px;
+				border-radius: 10px;
+				max-width: 600px;
+				width: 100%;
+			}
+			label {
+				display: block;
+				margin-top: 8px;
+				font-weight: 600;
+			}
+			input,
+			textarea,
+			select {
+				width: 100%;
+				padding: 8px;
+				border-radius: 8px;
+				border: 1px solid #ddd;
+				margin-top: 6px;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h2>PQR</h2>
+			<nav><a href="/dashboard.html" style="color: #fff; text-decoration: none">Volver</a></nav>
+		</header>
+		<div class="container">
+			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px">
+				<h3>Mis PQR</h3>
+				<button id="newBtn" class="btn">Nueva PQR</button>
+			</div>
 
-    <div id="pqrList" class="grid"></div>
-  </div>
+			<div id="pqrList" class="grid"></div>
+		</div>
 
-  <!-- Modal Nuevo -->
-  <div id="modalOverlay" class="modal-overlay">
-    <div class="modal">
-      <h3>Nueva PQR</h3>
-      <form id="pqrForm">
-        <label>Tipo<select id="tipo_pqr"><option value="peticion">Petición</option><option value="queja">Queja</option><option value="reclamo">Reclamo</option></select></label>
-        <label>Nombre<input id="nombre" required /></label>
-        <label>Descripción<textarea id="descripcion" rows="4"></textarea></label>
-        <div style="margin-top:12px"><button type="submit" class="btn">Enviar</button> <button type="button" id="cancelBtn">Cancelar</button></div>
-      </form>
-    </div>
-  </div>
+		<!-- Modal Nuevo -->
+		<div id="modalOverlay" class="modal-overlay">
+			<div class="modal">
+				<h3>Nueva PQR</h3>
+				<form id="pqrForm">
+					<label
+						>Tipo<select id="tipo_pqr">
+							<option value="peticion">Petición</option>
+							<option value="queja">Queja</option>
+							<option value="reclamo">Reclamo</option>
+						</select></label
+					>
+					<label>Nombre<input id="nombre" required /></label>
+					<label>Descripción<textarea id="descripcion" rows="4"></textarea></label>
+					<div style="margin-top: 12px"><button type="submit" class="btn">Enviar</button> <button type="button" id="cancelBtn">Cancelar</button></div>
+				</form>
+			</div>
+		</div>
 
-  <script>
-    const userId = localStorage.getItem('userId') || 2; // fallback
-    async function loadPqrs(){
-      try{
-        const res = await fetch('/api/pqrs?userId=' + userId);
-        const data = await res.json();
-        const list = document.getElementById('pqrList'); list.innerHTML='';
-        if(!data.success) { list.innerText='Error cargando PQRs'; return; }
-        data.pqrs.forEach(p => {
-          const div = document.createElement('div'); div.className='card';
-          div.innerHTML = `<strong>${p.consecutivo || ('PQR-'+p.id)}</strong> <span style="float:right">${p.tipo_pqr}</span><div style="margin-top:8px">${p.nombre}</div><div style="color:#666;margin-top:8px">${p.descripcion || ''}</div><div style="margin-top:10px"><small>Fecha: ${new Date(p.fecha).toLocaleString()}</small> <span style="float:right" class="status">${p.estado}</span></div>`;
-          list.appendChild(div);
-        });
-      }catch(err){console.error(err); document.getElementById('pqrList').innerText='Error de conexión';}
-    }
+		<script>
+			const userId = localStorage.getItem("userId") || 2; // fallback
+			async function loadPqrs() {
+				try {
+					const res = await fetch("/api/pqrs?userId=" + userId);
+					const data = await res.json();
+					const list = document.getElementById("pqrList");
+					list.innerHTML = "";
+					if (!data.success) {
+						list.innerText = "Error cargando PQRs";
+						return;
+					}
+					data.pqrs.forEach((p) => {
+						const div = document.createElement("div");
+						div.className = "card";
+						div.innerHTML = `<strong>${p.consecutivo || "PQR-" + p.id}</strong> <span style="float:right">${p.tipo_pqr}</span><div style="margin-top:8px">${p.nombre}</div><div style="color:#666;margin-top:8px">${p.descripcion || ""}</div><div style="margin-top:10px"><small>Fecha: ${new Date(p.fecha).toLocaleString()}</small> <span style="float:right" class="status">${p.estado}</span></div>`;
+						list.appendChild(div);
+					});
+				} catch (err) {
+					console.error(err);
+					document.getElementById("pqrList").innerText = "Error de conexión";
+				}
+			}
 
-    // Modal handling
-    const overlay = document.getElementById('modalOverlay');
-    document.getElementById('newBtn').addEventListener('click', ()=>{ overlay.style.display='flex'; });
-    document.getElementById('cancelBtn').addEventListener('click', ()=>{ overlay.style.display='none'; });
+			// Modal handling
+			const overlay = document.getElementById("modalOverlay");
+			document.getElementById("newBtn").addEventListener("click", () => {
+				overlay.style.display = "flex";
+			});
+			document.getElementById("cancelBtn").addEventListener("click", () => {
+				overlay.style.display = "none";
+			});
 
-    document.getElementById('pqrForm').addEventListener('submit', async function(e){
-      e.preventDefault();
-      const body = { usuario_id: Number(userId), tipo_pqr: document.getElementById('tipo_pqr').value, nombre: document.getElementById('nombre').value, descripcion: document.getElementById('descripcion').value };
-      try{
-        const res = await fetch('/api/pqrs', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)});
-        const data = await res.json();
-        if(data.success){ overlay.style.display='none'; loadPqrs(); }
-        else alert(data.message || 'Error');
-      }catch(err){console.error(err); alert('Error de conexión');}
-    });
+			document.getElementById("pqrForm").addEventListener("submit", async function (e) {
+				e.preventDefault();
+				const body = { usuario_id: Number(userId), tipo_pqr: document.getElementById("tipo_pqr").value, nombre: document.getElementById("nombre").value, descripcion: document.getElementById("descripcion").value };
+				try {
+					const res = await fetch("/api/pqrs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+					const data = await res.json();
+					if (data.success) {
+						overlay.style.display = "none";
+						loadPqrs();
+					} else alert(data.message || "Error");
+				} catch (err) {
+					console.error(err);
+					alert("Error de conexión");
+				}
+			});
 
-    window.addEventListener('DOMContentLoaded', loadPqrs);
-  </script>
-</body>
+			window.addEventListener("DOMContentLoaded", loadPqrs);
+		</script>
+	</body>
 </html>

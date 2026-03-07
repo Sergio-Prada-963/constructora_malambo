@@ -42,36 +42,36 @@ app.get("/api/projects", async (req, res) => {
 
 // PQR endpoints
 // Obtener PQRs, opcionalmente filtradas por usuario: /api/pqrs?userId=2
-app.get('/api/pqrs', async (req, res) => {
+app.get("/api/pqrs", async (req, res) => {
 	const userId = req.query.userId ? Number(req.query.userId) : null;
 	try {
 		let rows;
 		if (userId) {
-			[rows] = await pool.query('SELECT * FROM pqr WHERE usuario_id = ? ORDER BY fecha DESC', [userId]);
+			[rows] = await pool.query("SELECT * FROM pqr WHERE usuario_id = ? ORDER BY fecha DESC", [userId]);
 		} else {
-			[rows] = await pool.query('SELECT * FROM pqr ORDER BY fecha DESC');
+			[rows] = await pool.query("SELECT * FROM pqr ORDER BY fecha DESC");
 		}
 		res.json({ success: true, pqrs: rows });
 	} catch (err) {
-		console.error('PQRs error:', err.message || err);
-		res.status(500).json({ success: false, message: 'Error al obtener PQRs' });
+		console.error("PQRs error:", err.message || err);
+		res.status(500).json({ success: false, message: "Error al obtener PQRs" });
 	}
 });
 
 // Crear nueva PQR
-app.post('/api/pqrs', async (req, res) => {
+app.post("/api/pqrs", async (req, res) => {
 	const { usuario_id, tipo_pqr, nombre, descripcion } = req.body || {};
-	if (!usuario_id || !tipo_pqr || !nombre) return res.status(400).json({ success: false, message: 'Faltan campos requeridos' });
+	if (!usuario_id || !tipo_pqr || !nombre) return res.status(400).json({ success: false, message: "Faltan campos requeridos" });
 	try {
-		const consecutivo = 'PQR-' + Date.now();
+		const consecutivo = "PQR-" + Date.now();
 		const fecha = new Date();
-		const estado = 'radicad';
-		const sql = 'INSERT INTO pqr (usuario_id, tipo_pqr, estado, consecutivo, fecha, nombre, descripcion) VALUES (?, ?, ?, ?, ?, ?, ?)';
+		const estado = "radicad";
+		const sql = "INSERT INTO pqr (usuario_id, tipo_pqr, estado, consecutivo, fecha, nombre, descripcion) VALUES (?, ?, ?, ?, ?, ?, ?)";
 		const [result] = await pool.query(sql, [usuario_id, tipo_pqr, estado, consecutivo, fecha, nombre, descripcion]);
 		res.json({ success: true, id: result.insertId, consecutivo });
 	} catch (err) {
-		console.error('Create PQR error:', err.message || err);
-		res.status(500).json({ success: false, message: 'Error creando PQR' });
+		console.error("Create PQR error:", err.message || err);
+		res.status(500).json({ success: false, message: "Error creando PQR" });
 	}
 });
 

@@ -410,23 +410,23 @@
 						projectId: currentBuyProjectId,
 						cuotas,
 						valorCuota: monthlyValue,
-						valorTotal: totalValue
+						valorTotal: totalValue,
+					}),
+				})
+					.then((res) => res.json())
+					.then((data) => {
+						if (data.success) {
+							alert("Compra realizada exitosamente");
+							closeBuyPopup();
+							// Opcional: recargar proyectos o redirigir
+						} else {
+							alert("Error: " + data.message);
+						}
 					})
-				})
-				.then(res => res.json())
-				.then(data => {
-					if (data.success) {
-						alert("Compra realizada exitosamente");
-						closeBuyPopup();
-						// Opcional: recargar proyectos o redirigir
-					} else {
-						alert("Error: " + data.message);
-					}
-				})
-				.catch(err => {
-					console.error(err);
-					alert("Error de conexión");
-				});
+					.catch((err) => {
+						console.error(err);
+						alert("Error de conexión");
+					});
 			}
 		</script>
 	</body>
