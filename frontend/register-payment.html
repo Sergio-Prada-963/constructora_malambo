@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Registrar Pago - Constructora Malambo</title>
+
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: "Poppins", sans-serif;
+			}
+
+			body {
+				background: #ffffff;
+				color: #2f3a4d;
+				scroll-behavior: smooth;
+			}
+
+			/* HEADER */
+			header {
+				background: #1a1f2b;
+				color: white;
+				padding: 20px 50px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				position: sticky;
+				top: 0;
+				z-index: 1000;
+			}
+
+			header h1 span {
+				color: #d4a039;
+			}
+
+			nav a {
+				color: white;
+				margin-left: 25px;
+				text-decoration: none;
+				font-weight: 500;
+				transition: 0.3s;
+			}
+			nav a:hover {
+				color: #d4a039;
+			}
+
+			/* HERO */
+			.hero {
+				height: 40vh;
+				position: relative;
+				overflow: hidden;
+				background: linear-gradient(135deg, #1a1f2b, #2f3a4d);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
+
+			.hero-content h2 {
+				font-size: 48px;
+				color: white;
+				margin-bottom: 20px;
+			}
+			.hero-content p {
+				font-size: 18px;
+				color: #d4a039;
+			}
+
+			/* FORMULARIO */
+			.section {
+				padding: 80px 50px;
+				text-align: center;
+			}
+
+			.form-container {
+				max-width: 600px;
+				margin: auto;
+				background: white;
+				border-radius: 15px;
+				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+				padding: 40px;
+			}
+
+			.form-container h2 {
+				font-size: 36px;
+				margin-bottom: 30px;
+			}
+
+			.input-group {
+				margin-bottom: 20px;
+				text-align: left;
+			}
+
+			label {
+				display: block;
+				margin-bottom: 5px;
+				font-weight: 600;
+				color: #2f3a4d;
+			}
+
+			input,
+			select {
+				width: 100%;
+				padding: 12px;
+				border-radius: 8px;
+				border: 1px solid #ccc;
+				font-size: 16px;
+				outline: none;
+			}
+
+			button {
+				width: 100%;
+				padding: 14px;
+				border: none;
+				background: #1a1f2b;
+				color: white;
+				border-radius: 8px;
+				cursor: pointer;
+				font-size: 16px;
+				font-weight: 600;
+				margin-top: 20px;
+				transition: 0.3s;
+			}
+
+			button:hover {
+				background: #d4a039;
+			}
+
+			.message {
+				margin-top: 20px;
+				font-size: 14px;
+				display: none;
+			}
+
+			.success {
+				color: green;
+			}
+
+			.error {
+				color: red;
+			}
+
+			footer {
+				background: #1a1f2b;
+				color: white;
+				text-align: center;
+				padding: 20px;
+				margin-top: 50px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<h1>Constructora <span>Malambo</span></h1>
+			<nav>
+				<a href="lots.html">Volver a Mis Lotes</a>
+				<a href="dashboard.html">Dashboard</a>
+				<a href="#" onclick="logout()">Cerrar Sesión</a>
+			</nav>
+		</header>
+
+		<!-- HERO -->
+		<section class="hero">
+			<div class="hero-content">
+				<h2>Registrar Pago</h2>
+				<p>Registra un nuevo pago para tu lote</p>
+			</div>
+		</section>
+
+		<!-- FORMULARIO -->
+		<section class="section">
+			<div class="form-container">
+				<h2>Información del Pago</h2>
+				<div class="input-group">
+					<label>Proyecto ID</label>
+					<select id="projectId" required onchange="loadLoteData()">
+						<option value="">Selecciona un proyecto</option>
+					</select>
+					<input type="hidden" id="realProjectId" />
+				</div>
+				<div class="input-group">
+					<label>Valor del Pago</label>
+					<input type="number" id="valor" step="0.01" placeholder="Ej: 500000.00" required oninput="calculateFields()" />
+				</div>
+				<div class="input-group">
+					<label>Intereses (12%)</label>
+					<input type="number" id="intereses" step="0.01" readonly />
+				</div>
+				<div class="input-group">
+					<label>Aporte a Capital</label>
+					<input type="number" id="aporteCapital" step="0.01" readonly />
+				</div>
+				<div class="input-group">
+					<label>Valor de la Cuota Actual</label>
+					<input type="number" id="valorCuotaActual" step="0.01" readonly />
+				</div>
+				<button onclick="registerPayment()">Registrar Pago</button>
+				<p class="message" id="message"></p>
+			</div>
+		</section>
+
+		<footer>© 2026 Constructora Malambo – Todos los derechos reservados</footer>
+
+		<script>
+			const userId = localStorage.getItem("userId");
+			if (!userId) {
+				alert("No has iniciado sesión");
+				window.location.href = "login.html";
+			}
+
+			let userLotes = [];
+
+			// Cargar proyectos del usuario
+			window.onload = function () {
+				fetch(`/api/user-lotes?userId=${userId}`)
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							userLotes = data.lotes;
+							const select = document.getElementById("projectId");
+							data.lotes.forEach((lote) => {
+								const option = document.createElement("option");
+								option.value = lote.id;
+								option.textContent = `${lote.lote_name} - ${lote.cuotas_total} cuotas, restante: $${lote.valor_restante}`;
+								select.appendChild(option);
+							});
+						} else {
+							alert("Error al cargar los proyectos");
+						}
+					})
+					.catch((error) => {
+						console.error("Error:", error);
+						alert("Error de conexión");
+					});
+
+				// Set default date to today
+				document.getElementById("fechaPago").value = new Date().toISOString().split("T")[0];
+			};
+
+			function loadLoteData() {
+				const loteId = document.getElementById("projectId").value;
+				const lote = userLotes.find((l) => l.id == loteId);
+				if (lote) {
+					document.getElementById("realProjectId").value = lote.project_id;
+					document.getElementById("totalCuotas").value = lote.cuotas_total;
+					document.getElementById("valorCuotaActual").value = lote.valor_cuota;
+					document.getElementById("valor").value = lote.valor_cuota;
+					const pagos = JSON.parse(lote.pagos_ids || "[]");
+					document.getElementById("cuotasNro").value = pagos.length + 1;
+					const valor = lote.valor_cuota;
+					const intereses = valor * 0.12;
+					const aporteCapital = valor - intereses;
+					document.getElementById("intereses").value = intereses.toFixed(2);
+					document.getElementById("aporteCapital").value = aporteCapital.toFixed(2);
+				}
+			}
+
+			function calculateFields() {
+				try {
+					const valor = parseFloat(document.getElementById("valor").value) || 0;
+					const intereses = valor * 0.12;
+					const aporteCapital = valor - intereses;
+					const valorCuotaActual = valor;
+
+					const interesesEl = document.getElementById("intereses");
+					const aporteCapitalEl = document.getElementById("aporteCapital");
+					const valorCuotaActualEl = document.getElementById("valorCuotaActual");
+
+					if (interesesEl) interesesEl.value = intereses.toFixed(2);
+					if (aporteCapitalEl) aporteCapitalEl.value = aporteCapital.toFixed(2);
+					if (valorCuotaActualEl) valorCuotaActualEl.value = valorCuotaActual.toFixed(2);
+				} catch (error) {
+					console.error("Error in calculateFields:", error);
+				}
+			}
+
+			function registerPayment() {
+				const loteId = document.getElementById("projectId").value;
+				const projectId = document.getElementById("realProjectId").value;
+				const valor = document.getElementById("valorCuotaActual").value;
+				const cuotasNro = document.getElementById("cuotasNro").value;
+				const fechaPago = document.getElementById("fechaPago").value;
+				const totalCuotas = document.getElementById("totalCuotas").value;
+				const intereses = document.getElementById("intereses").value;
+				const aporteCapital = document.getElementById("aporteCapital").value;
+				const msg = document.getElementById("message");
+
+				if (!projectId || !valor || !cuotasNro || !fechaPago || !totalCuotas) {
+					msg.textContent = "Todos los campos requeridos deben estar completos";
+					msg.className = "message error";
+					msg.style.display = "block";
+					return;
+				}
+
+				fetch("/api/payments", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						userId,
+						projectId,
+						loteId,
+						valor: parseFloat(valor),
+						cuotasNro: parseInt(cuotasNro),
+						fechaPago,
+						totalCuotas: parseInt(totalCuotas),
+						intereses: parseFloat(intereses),
+						aporteCapital: parseFloat(aporteCapital),
+					}),
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							msg.textContent = "Pago registrado correctamente";
+							msg.className = "message success";
+							msg.style.display = "block";
+							setTimeout(() => {
+								window.location.href = "payments.html";
+							}, 2000);
+						} else {
+							msg.textContent = data.message;
+							msg.className = "message error";
+							msg.style.display = "block";
+						}
+					})
+					.catch((error) => {
+						console.error("Error:", error);
+						msg.textContent = "Error de conexión";
+						msg.className = "message error";
+						msg.style.display = "block";
+					});
+			}
+
+			function logout() {
+				localStorage.removeItem("userId");
+				window.location.href = "index.html";
+			}
+		</script>
+	</body>
+</html>

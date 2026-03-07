@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Gestión de Lotes - Constructora Malambo</title>
+
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background: #f4f6f9;
+				margin: 0;
+				padding: 20px;
+			}
+
+			h1 {
+				text-align: center;
+				color: #2c3e50;
+			}
+
+			.container {
+				max-width: 1100px;
+				margin: auto;
+				background: white;
+				padding: 20px;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+
+			form {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 10px;
+				margin-bottom: 20px;
+			}
+
+			form input,
+			form select {
+				padding: 8px;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+			}
+
+			form button {
+				grid-column: span 3;
+				padding: 10px;
+				background: #27ae60;
+				color: white;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+			}
+
+			form button:hover {
+				background: #219150;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+
+			th,
+			td {
+				padding: 10px;
+				text-align: center;
+				border-bottom: 1px solid #ddd;
+			}
+
+			th {
+				background: #2c3e50;
+				color: white;
+			}
+
+			.estado-disponible {
+				color: green;
+				font-weight: bold;
+			}
+			.estado-reservado {
+				color: orange;
+				font-weight: bold;
+			}
+			.estado-vendido {
+				color: red;
+				font-weight: bold;
+			}
+
+			.actions button {
+				padding: 5px 8px;
+				margin: 2px;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+			}
+
+			.btn-editar {
+				background: #3498db;
+				color: white;
+			}
+			.btn-eliminar {
+				background: #e74c3c;
+				color: white;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<h1>🏗️ Gestión de Lotes - Constructora Malambo</h1>
+
+			<form id="loteForm">
+				<input type="text" id="codigo" placeholder="Código del lote" required />
+				<input type="number" id="area" placeholder="Área (m²)" required />
+				<input type="text" id="ubicacion" placeholder="Ubicación" required />
+				<input type="number" id="valor" placeholder="Valor" required />
+
+				<select id="etapa" required>
+					<option value="">Seleccione Etapa</option>
+					<option>Etapa 1</option>
+					<option>Etapa 2</option>
+					<option>Etapa 3</option>
+				</select>
+
+				<select id="estado" required>
+					<option value="Disponible">Disponible</option>
+					<option value="Reservado">Reservado</option>
+					<option value="Vendido">Vendido</option>
+				</select>
+
+				<button type="submit">Agregar Lote</button>
+			</form>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Código</th>
+						<th>Área (m²)</th>
+						<th>Ubicación</th>
+						<th>Valor</th>
+						<th>Etapa</th>
+						<th>Estado</th>
+						<th>Acciones</th>
+					</tr>
+				</thead>
+				<tbody id="tablaLotes"></tbody>
+			</table>
+		</div>
+
+		<script>
+			let lotes = [];
+			let editIndex = null;
+
+			const form = document.getElementById("loteForm");
+			const tabla = document.getElementById("tablaLotes");
+
+			form.addEventListener("submit", function (e) {
+				e.preventDefault();
+
+				const lote = {
+					codigo: codigo.value,
+					area: area.value,
+					ubicacion: ubicacion.value,
+					valor: valor.value,
+					etapa: etapa.value,
+					estado: estado.value,
+				};
+
+				if (editIndex === null) {
+					lotes.push(lote);
+				} else {
+					lotes[editIndex] = lote;
+					editIndex = null;
+				}
+
+				form.reset();
+				renderizarTabla();
+			});
+
+			function renderizarTabla() {
+				tabla.innerHTML = "";
+
+				lotes.forEach((lote, index) => {
+					let claseEstado = "";
+					if (lote.estado === "Disponible") claseEstado = "estado-disponible";
+					if (lote.estado === "Reservado") claseEstado = "estado-reservado";
+					if (lote.estado === "Vendido") claseEstado = "estado-vendido";
+
+					tabla.innerHTML += `
+            <tr>
+                <td>${lote.codigo}</td>
+                <td>${lote.area}</td>
+                <td>${lote.ubicacion}</td>
+                <td>$${parseInt(lote.valor).toLocaleString()}</td>
+                <td>${lote.etapa}</td>
+                <td class="${claseEstado}">${lote.estado}</td>
+                <td class="actions">
+                    <button class="btn-editar" onclick="editarLote(${index})">Editar</button>
+                    <button class="btn-eliminar" onclick="eliminarLote(${index})">Eliminar</button>
+                </td>
+            </tr>
+        `;
+				});
+			}
+
+			function editarLote(index) {
+				const lote = lotes[index];
+				codigo.value = lote.codigo;
+				area.value = lote.area;
+				ubicacion.value = lote.ubicacion;
+				valor.value = lote.valor;
+				etapa.value = lote.etapa;
+				estado.value = lote.estado;
+
+				editIndex = index;
+			}
+
+			function eliminarLote(index) {
+				if (confirm("¿Seguro que deseas eliminar este lote?")) {
+					lotes.splice(index, 1);
+					renderizarTabla();
+				}
+			}
+		</script>
+	</body>
+</html>

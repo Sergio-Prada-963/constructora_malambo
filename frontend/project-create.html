@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Crear Proyecto</title>
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+		<style>
+			body {
+				font-family: Poppins, sans-serif;
+				margin: 0;
+				color: #2f3a4d;
+			}
+			header {
+				background: #1a1f2b;
+				color: #fff;
+				padding: 18px 28px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			.container {
+				padding: 28px;
+				max-width: 900px;
+				margin: 0 auto;
+			}
+			label {
+				display: block;
+				margin-top: 12px;
+				font-weight: 600;
+			}
+			input,
+			textarea,
+			select {
+				width: 100%;
+				padding: 10px;
+				border-radius: 8px;
+				border: 1px solid #ddd;
+				margin-top: 6px;
+			}
+			button {
+				margin-top: 14px;
+				padding: 10px 14px;
+				border: none;
+				background: #1a1f2b;
+				color: #fff;
+				border-radius: 8px;
+				cursor: pointer;
+			}
+			.row {
+				display: flex;
+				gap: 12px;
+			}
+			.col {
+				flex: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h2>Crear Proyecto</h2>
+			<nav><a href="/dashboard.html" style="color: #fff; text-decoration: none">Volver</a></nav>
+		</header>
+		<div class="container">
+			<form id="createForm">
+				<label>Nombre<input id="nombre" required /></label>
+				<label>Descripción<textarea id="descripcion" rows="4"></textarea></label>
+				<div class="row">
+					<div class="col">
+						<label>Largo<input id="largo" type="number" step="0.01" /></label>
+					</div>
+					<div class="col">
+						<label>Ancho<input id="ancho" type="number" step="0.01" /></label>
+					</div>
+				</div>
+				<label>Precio<input id="precio" type="number" step="0.01" /></label>
+				<label>Ubicación<input id="ubicacion" /></label>
+				<div class="row">
+					<div class="col">
+						<label>Baños<input id="banos" type="number" /></label>
+					</div>
+					<div class="col">
+						<label>Habitaciones<input id="habitaciones" type="number" /></label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col">
+						<label>Comedor<input id="comedor" type="number" /></label>
+					</div>
+					<div class="col">
+						<label>Sala<input id="sala" type="number" /></label>
+					</div>
+				</div>
+				<label>Cocina<input id="cocina" type="number" /></label>
+				<label>Cantidad disponible<input id="cantidad_disponible" type="number" /></label>
+				<label
+					>Etapa<select id="etapa">
+						<option value="planificacion">Planificacion</option>
+						<option value="Diseño">Diseño</option>
+						<option value="Preconstruccion">Preconstruccion</option>
+						<option value="Ejecuccion">Ejecuccion</option>
+						<option value="Cierre y entrega">Cierre y entrega</option>
+					</select></label
+				>
+				<label
+					>Estado<select id="estado">
+						<option value="disponible">Disponible</option>
+						<option value="reservado">Reservado</option>
+						<option value="vendido">Vendido</option>
+					</select></label
+				>
+				<label>Imagen URL<input id="img" /></label>
+				<button type="submit">Crear proyecto</button>
+			</form>
+			<div id="status" style="margin-top: 12px"></div>
+		</div>
+
+		<script>
+			document.getElementById("createForm").addEventListener("submit", async function (e) {
+				e.preventDefault();
+				const body = {
+					nombre: document.getElementById("nombre").value,
+					descripcion: document.getElementById("descripcion").value,
+					largo: document.getElementById("largo").value,
+					ancho: document.getElementById("ancho").value,
+					precio: document.getElementById("precio").value,
+					ubicacion: document.getElementById("ubicacion").value,
+					banos: document.getElementById("banos").value,
+					habitaciones: document.getElementById("habitaciones").value,
+					comedor: document.getElementById("comedor").value,
+					sala: document.getElementById("sala").value,
+					cocina: document.getElementById("cocina").value,
+					cantidad_disponible: document.getElementById("cantidad_disponible").value,
+					etapa: document.getElementById("etapa").value,
+					estado: document.getElementById("estado").value,
+					img: document.getElementById("img").value,
+				};
+				try {
+					const res = await fetch("/api/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+					const data = await res.json();
+					if (data.success) {
+						document.getElementById("status").innerText = "Proyecto creado";
+						setTimeout(() => {
+							location.href = "/dashboard.html";
+						}, 800);
+					} else document.getElementById("status").innerText = data.message || "Error";
+				} catch (err) {
+					console.error(err);
+					document.getElementById("status").innerText = "Error de conexión";
+				}
+			});
+		</script>
+	</body>
+</html>

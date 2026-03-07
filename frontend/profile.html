@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Mi Perfil - Constructora Malambo</title>
+
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: "Poppins", sans-serif;
+			}
+
+			body {
+				background: #ffffff;
+				color: #2f3a4d;
+				scroll-behavior: smooth;
+			}
+
+			/* HEADER */
+			header {
+				background: #1a1f2b;
+				color: white;
+				padding: 20px 50px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				position: sticky;
+				top: 0;
+				z-index: 1000;
+			}
+
+			header h1 span {
+				color: #d4a039;
+			}
+
+			nav a {
+				color: white;
+				margin-left: 25px;
+				text-decoration: none;
+				font-weight: 500;
+				transition: 0.3s;
+			}
+			nav a:hover {
+				color: #d4a039;
+			}
+
+			/* HERO */
+			.hero {
+				height: 40vh;
+				position: relative;
+				overflow: hidden;
+				background: linear-gradient(135deg, #1a1f2b, #2f3a4d);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
+
+			.hero-content h2 {
+				font-size: 48px;
+				color: white;
+				margin-bottom: 20px;
+			}
+			.hero-content p {
+				font-size: 18px;
+				color: #d4a039;
+			}
+
+			/* FORMULARIO */
+			.section {
+				padding: 80px 50px;
+				text-align: center;
+			}
+
+			.form-container {
+				max-width: 600px;
+				margin: auto;
+				background: white;
+				border-radius: 15px;
+				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+				padding: 40px;
+			}
+
+			.form-container h2 {
+				font-size: 36px;
+				margin-bottom: 30px;
+			}
+
+			.input-group {
+				margin-bottom: 20px;
+				text-align: left;
+			}
+
+			label {
+				display: block;
+				margin-bottom: 5px;
+				font-weight: 600;
+				color: #2f3a4d;
+			}
+
+			input {
+				width: 100%;
+				padding: 12px;
+				border-radius: 8px;
+				border: 1px solid #ccc;
+				font-size: 16px;
+				outline: none;
+			}
+
+			button {
+				width: 100%;
+				padding: 14px;
+				border: none;
+				background: #1a1f2b;
+				color: white;
+				border-radius: 8px;
+				cursor: pointer;
+				font-size: 16px;
+				font-weight: 600;
+				margin-top: 20px;
+				transition: 0.3s;
+			}
+
+			button:hover {
+				background: #d4a039;
+			}
+
+			.message {
+				margin-top: 20px;
+				font-size: 14px;
+				display: none;
+			}
+
+			.success {
+				color: green;
+			}
+
+			.error {
+				color: red;
+			}
+
+			footer {
+				background: #1a1f2b;
+				color: white;
+				text-align: center;
+				padding: 20px;
+				margin-top: 50px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<h1>Constructora <span>Malambo</span></h1>
+			<nav>
+				<a href="dashboard.html">Volver al Dashboard</a>
+				<a href="#" onclick="logout()">Cerrar Sesión</a>
+			</nav>
+		</header>
+
+		<!-- HERO -->
+		<section class="hero">
+			<div class="hero-content">
+				<h2>Mi Perfil</h2>
+				<p>Actualiza tu información personal</p>
+			</div>
+		</section>
+
+		<!-- FORMULARIO -->
+		<section class="section">
+			<div class="form-container">
+				<h2>Información del Usuario</h2>
+				<div class="input-group">
+					<label>Nombre completo</label>
+					<input type="text" id="name" />
+				</div>
+				<div class="input-group">
+					<label>Nombre de usuario</label>
+					<input type="text" id="username" />
+				</div>
+				<div class="input-group">
+					<label>Correo electrónico</label>
+					<input type="email" id="email" />
+				</div>
+				<div class="input-group">
+					<label>Rol</label>
+					<input type="text" id="role" readonly />
+				</div>
+				<div class="input-group">
+					<label>Fecha de registro</label>
+					<input type="text" id="created_at" readonly />
+				</div>
+				<button onclick="updateProfile()">Actualizar Perfil</button>
+				<p class="message" id="message"></p>
+			</div>
+		</section>
+
+		<footer>© 2026 Constructora Malambo – Todos los derechos reservados</footer>
+
+		<script>
+			const userId = localStorage.getItem("userId");
+			if (!userId) {
+				alert("No has iniciado sesión");
+				window.location.href = "login.html";
+			}
+
+			// Cargar info del usuario
+			window.onload = function () {
+				fetch(`/api/user?userId=${userId}`)
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							document.getElementById("name").value = data.user.name;
+							document.getElementById("username").value = data.user.username;
+							document.getElementById("email").value = data.user.email;
+							document.getElementById("role").value = data.user.role;
+							document.getElementById("created_at").value = new Date(data.user.created_at).toLocaleDateString();
+						} else {
+							alert("Error al cargar la información");
+						}
+					})
+					.catch((error) => {
+						console.error("Error:", error);
+						alert("Error de conexión");
+					});
+			};
+
+			function updateProfile() {
+				const name = document.getElementById("name").value;
+				const username = document.getElementById("username").value;
+				const email = document.getElementById("email").value;
+				const msg = document.getElementById("message");
+
+				if (!name || !username || !email) {
+					msg.textContent = "Todos los campos son requeridos";
+					msg.className = "message error";
+					msg.style.display = "block";
+					return;
+				}
+
+				fetch("/api/user", {
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ userId, name, username, email }),
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							msg.textContent = "Perfil actualizado correctamente";
+							msg.className = "message success";
+						} else {
+							msg.textContent = data.message;
+							msg.className = "message error";
+						}
+						msg.style.display = "block";
+					})
+					.catch((error) => {
+						console.error("Error:", error);
+						msg.textContent = "Error de conexión";
+						msg.className = "message error";
+						msg.style.display = "block";
+					});
+			}
+
+			function logout() {
+				localStorage.removeItem("userId");
+				window.location.href = "index.html";
+			}
+		</script>
+	</body>
+</html>

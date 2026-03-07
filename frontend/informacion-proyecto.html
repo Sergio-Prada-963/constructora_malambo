@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Información del Proyecto - Constructora Malambo</title>
+
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 0;
+				background: #f4f6f9;
+			}
+
+			header {
+				background: #2c3e50;
+				color: white;
+				padding: 20px;
+				text-align: center;
+			}
+
+			.container {
+				max-width: 1100px;
+				margin: 30px auto;
+				padding: 20px;
+				background: white;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+
+			h2 {
+				color: #2c3e50;
+			}
+
+			.info-general {
+				margin-bottom: 30px;
+			}
+
+			.etapas {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+				gap: 20px;
+			}
+
+			.card {
+				padding: 20px;
+				border-radius: 10px;
+				color: white;
+				cursor: pointer;
+				transition: 0.3s;
+			}
+
+			.card:hover {
+				transform: scale(1.05);
+			}
+
+			.lanzamiento {
+				background: #3498db;
+			}
+			.preventa {
+				background: #f39c12;
+			}
+			.construccion {
+				background: #27ae60;
+			}
+			.entrega {
+				background: #8e44ad;
+			}
+
+			.detalle {
+				margin-top: 20px;
+				padding: 15px;
+				background: #ecf0f1;
+				border-radius: 8px;
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<h1>🏗️ Información del Proyecto - Constructora Malambo</h1>
+		</header>
+
+		<div class="container">
+			<div class="info-general">
+				<h2>📌 Información General</h2>
+				<p><strong>Nombre del Proyecto:</strong> Urbanización Villa Malambo</p>
+				<p><strong>Ubicación:</strong> Malambo, Atlántico</p>
+				<p><strong>Total de Lotes:</strong> 120</p>
+				<p><strong>Área Promedio:</strong> 98m² - 150m²</p>
+				<p><strong>Estado Actual:</strong> En Desarrollo</p>
+				<p><strong>Descripción:</strong> Proyecto habitacional diseñado para ofrecer calidad de vida, zonas verdes, vías pavimentadas y servicios públicos completos.</p>
+			</div>
+
+			<h2>📊 Etapas del Proyecto</h2>
+
+			<div class="etapas">
+				<div class="card lanzamiento" onclick="mostrarDetalle('lanzamiento')">
+					<h3>🚀 Lanzamiento</h3>
+					<p>Inicio del proyecto y promoción inicial.</p>
+				</div>
+
+				<div class="card preventa" onclick="mostrarDetalle('preventa')">
+					<h3>💰 Preventa</h3>
+					<p>Venta anticipada con precios especiales.</p>
+				</div>
+
+				<div class="card construccion" onclick="mostrarDetalle('construccion')">
+					<h3>🏗️ Construcción</h3>
+					<p>Desarrollo físico del proyecto.</p>
+				</div>
+
+				<div class="card entrega" onclick="mostrarDetalle('entrega')">
+					<h3>🏡 Entrega</h3>
+					<p>Entrega oficial de lotes a propietarios.</p>
+				</div>
+			</div>
+
+			<div id="detalleEtapa" class="detalle"></div>
+		</div>
+
+		<script>
+			function mostrarDetalle(etapa) {
+				const detalle = document.getElementById("detalleEtapa");
+				detalle.style.display = "block";
+
+				if (etapa === "lanzamiento") {
+					detalle.innerHTML = `
+        <h3>🚀 Etapa de Lanzamiento</h3>
+        <p>Se presenta oficialmente el proyecto al público.</p>
+        <ul>
+            <li>Publicidad y marketing.</li>
+            <li>Evento de apertura.</li>
+            <li>Precios promocionales iniciales.</li>
+        </ul>
+        `;
+				}
+
+				if (etapa === "preventa") {
+					detalle.innerHTML = `
+        <h3>💰 Etapa de Preventa</h3>
+        <p>Se venden lotes antes de iniciar construcción.</p>
+        <ul>
+            <li>Descuentos especiales.</li>
+            <li>Planes de financiación flexibles.</li>
+            <li>Separación con cuota inicial baja.</li>
+        </ul>
+        `;
+				}
+
+				if (etapa === "construccion") {
+					detalle.innerHTML = `
+        <h3>🏗️ Etapa de Construcción</h3>
+        <p>Se ejecutan las obras del proyecto.</p>
+        <ul>
+            <li>Movimiento de tierras.</li>
+            <li>Instalación de servicios públicos.</li>
+            <li>Pavimentación y zonas verdes.</li>
+        </ul>
+        `;
+				}
+
+				if (etapa === "entrega") {
+					detalle.innerHTML = `
+        <h3>🏡 Etapa de Entrega</h3>
+        <p>Se realiza la entrega formal de los lotes.</p>
+        <ul>
+            <li>Firma de escrituras.</li>
+            <li>Acta de entrega.</li>
+            <li>Inicio de construcción por propietarios.</li>
+        </ul>
+        `;
+				}
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Mis Lotes - Constructora Malambo</title>
+
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: "Poppins", sans-serif;
+			}
+
+			body {
+				background: #ffffff;
+				color: #2f3a4d;
+				scroll-behavior: smooth;
+			}
+
+			/* HEADER */
+			header {
+				background: #1a1f2b;
+				color: white;
+				padding: 20px 50px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				position: sticky;
+				top: 0;
+				z-index: 1000;
+			}
+
+			header h1 span {
+				color: #d4a039;
+			}
+
+			nav a {
+				color: white;
+				margin-left: 25px;
+				text-decoration: none;
+				font-weight: 500;
+				transition: 0.3s;
+			}
+			nav a:hover {
+				color: #d4a039;
+			}
+
+			/* HERO */
+			.hero {
+				height: 40vh;
+				position: relative;
+				overflow: hidden;
+				background: linear-gradient(135deg, #1a1f2b, #2f3a4d);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
+
+			.hero-content h2 {
+				font-size: 48px;
+				color: white;
+				margin-bottom: 20px;
+			}
+			.hero-content p {
+				font-size: 18px;
+				color: #d4a039;
+			}
+
+			/* SECTION */
+			.section {
+				padding: 80px 50px;
+				text-align: center;
+			}
+
+			.section h2 {
+				font-size: 36px;
+				margin-bottom: 20px;
+			}
+
+			.subtitle {
+				color: #666;
+				margin-bottom: 50px;
+			}
+
+			/* GRID */
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+				gap: 30px;
+			}
+
+			.card {
+				background: white;
+				border-radius: 15px;
+				overflow: hidden;
+				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+				transition: 0.3s;
+				opacity: 0;
+				transform: translateY(40px);
+			}
+
+			.card.show {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			.card:hover {
+				transform: translateY(-10px);
+				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+			}
+
+			.card-content {
+				padding: 20px;
+				text-align: left;
+			}
+
+			.card-content h3 {
+				font-size: 24px;
+				margin-bottom: 10px;
+				color: #1a1f2b;
+			}
+
+			.card-content p {
+				color: #666;
+				margin-bottom: 8px;
+			}
+
+			.card button {
+				padding: 10px 15px;
+				border: none;
+				background: #1a1f2b;
+				color: white;
+				border-radius: 6px;
+				cursor: pointer;
+				transition: 0.3s;
+				margin-top: 15px;
+			}
+
+			.card button:hover {
+				background: #d4a039;
+			}
+
+			/* MODAL */
+			.modal {
+				display: none;
+				position: fixed;
+				z-index: 2000;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0, 0, 0, 0.5);
+				justify-content: center;
+				align-items: center;
+			}
+
+			.modal-content {
+				background: white;
+				border-radius: 15px;
+				padding: 30px;
+				max-width: 500px;
+				width: 90%;
+				max-height: 80vh;
+				overflow-y: auto;
+			}
+
+			.close {
+				float: right;
+				font-size: 28px;
+				font-weight: bold;
+				cursor: pointer;
+			}
+
+			.close:hover {
+				color: #d4a039;
+			}
+
+			.modal h3 {
+				margin-top: 20px;
+				margin-bottom: 10px;
+			}
+
+			.modal p {
+				margin-bottom: 5px;
+			}
+
+			footer {
+				background: #1a1f2b;
+				color: white;
+				text-align: center;
+				padding: 20px;
+				margin-top: 50px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<h1>Constructora <span>Malambo</span></h1>
+			<nav>
+				<a href="dashboard.html">Volver al Dashboard</a>
+				<a href="register-payment.html">Registrar Pago</a>
+				<a href="#" onclick="logout()">Cerrar Sesión</a>
+			</nav>
+		</header>
+
+		<!-- HERO -->
+		<section class="hero">
+			<div class="hero-content">
+				<h2>Mis Lotes</h2>
+				<p>Gestiona los lotes que has adquirido</p>
+			</div>
+		</section>
+
+		<!-- LOTES -->
+		<section class="section">
+			<h2>Mis Lotes Adquiridos</h2>
+			<p class="subtitle">Aquí puedes ver todos tus lotes.</p>
+			<div class="grid" id="lotesGrid">
+				<!-- Cards se generan dinámicamente -->
+			</div>
+		</section>
+
+		<!-- MODAL -->
+		<div id="loteModal" class="modal">
+			<div class="modal-content">
+				<span class="close" onclick="closeModal()">&times;</span>
+				<h2>Detalles del Lote</h2>
+				<div id="modalDetails">
+					<!-- Detalles se llenan dinámicamente -->
+				</div>
+			</div>
+		</div>
+
+		<footer>© 2026 Constructora Malambo – Todos los derechos reservados</footer>
+
+		<script>
+			const userId = localStorage.getItem("userId");
+			if (!userId) {
+				alert("No has iniciado sesión");
+				window.location.href = "login.html";
+			}
+
+			// Cargar lotes
+			window.onload = function () {
+				fetch(`/api/user-lotes?userId=${userId}`)
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							displayLotes(data.lotes);
+						} else {
+							alert("Error al cargar los lotes");
+						}
+					})
+					.catch((error) => {
+						console.error("Error:", error);
+						alert("Error de conexión");
+					});
+			};
+
+			function displayLotes(lotes) {
+				const grid = document.getElementById("lotesGrid");
+				if (lotes.length === 0) {
+					grid.innerHTML = "<p>No tienes lotes registrados.</p>";
+					return;
+				}
+				lotes.forEach((lote, index) => {
+					const card = document.createElement("div");
+					card.className = "card";
+					setTimeout(() => card.classList.add("show"), index * 100);
+					const pagosCount = lote.pagos_ids ? lote.pagos_ids.split(",").length : 0;
+					card.innerHTML = `
+						<div class="card-content">
+							<h3>${lote.lote_name}</h3>
+							<p><strong>Proyecto:</strong> ${lote.project_id}</p>
+							<p><strong>Fecha de Compra:</strong> ${new Date(lote.fecha_compra).toLocaleDateString()}</p>
+							<p><strong>Número de Cuotas:</strong> ${lote.numero_cuotas}</p>
+							<p><strong>Pagos Relacionados:</strong> ${pagosCount}</p>
+							<button onclick="showDetails(${lote.id})">Ver Detalles</button>
+						</div>
+					`;
+					grid.appendChild(card);
+				});
+			}
+
+			function showDetails(loteId) {
+				fetch(`/api/user-lotes?userId=${userId}`)
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							const lote = data.lotes.find((l) => l.id == loteId);
+							if (lote) {
+								const details = document.getElementById("modalDetails");
+								details.innerHTML = `
+									<h3>${lote.lote_name}</h3>
+									<p><strong>ID del Proyecto:</strong> ${lote.project_id}</p>
+									<p><strong>Fecha de Compra:</strong> ${new Date(lote.fecha_compra).toLocaleDateString()}</p>
+									<p><strong>Número de Cuotas:</strong> ${lote.numero_cuotas}</p>
+									<p><strong>Pagos IDs:</strong> ${lote.pagos_ids || "Ninguno"}</p>
+									<p><strong>Fecha de Registro:</strong> ${new Date(lote.created_at).toLocaleString()}</p>
+								`;
+								document.getElementById("loteModal").style.display = "flex";
+							}
+						}
+					})
+					.catch((error) => {
+						console.error("Error:", error);
+					});
+			}
+
+			function closeModal() {
+				document.getElementById("loteModal").style.display = "none";
+			}
+
+			// Cerrar modal al hacer clic fuera
+			window.onclick = function (event) {
+				const modal = document.getElementById("loteModal");
+				if (event.target == modal) {
+					modal.style.display = "none";
+				}
+			};
+
+			function logout() {
+				localStorage.removeItem("userId");
+				window.location.href = "index.html";
+			}
+		</script>
+	</body>
+</html>

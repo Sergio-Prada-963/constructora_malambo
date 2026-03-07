@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Constructora Malambo - Login</title>
+
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: "Poppins", sans-serif;
+			}
+
+			body {
+				height: 100vh;
+				background: url("https://images.pexels.com/photos/585419/pexels-photo-585419.jpeg") center/cover no-repeat;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				backdrop-filter: blur(3px);
+			}
+
+			.container {
+				width: 380px;
+				background: rgba(255, 255, 255, 0.12);
+				border-radius: 25px;
+				box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+				padding: 35px;
+				backdrop-filter: blur(18px);
+				animation: fadeIn 0.7s ease;
+			}
+
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+					transform: translateY(-20px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			h2 {
+				text-align: center;
+				color: #fff;
+				margin-bottom: 25px;
+				letter-spacing: 1px;
+			}
+
+			.input-group {
+				margin-bottom: 18px;
+				display: flex;
+				flex-direction: column;
+			}
+
+			label {
+				color: #fff;
+				font-weight: 600;
+			}
+
+			input {
+				padding: 12px;
+				border-radius: 12px;
+				border: none;
+				margin-top: 5px;
+				font-size: 15px;
+				outline: none;
+			}
+
+			button {
+				width: 100%;
+				padding: 12px;
+				border: none;
+				border-radius: 12px;
+				background: #0a3d62;
+				color: white;
+				cursor: pointer;
+				font-size: 16px;
+				font-weight: 600;
+				margin-top: 10px;
+				transition: 0.3s;
+			}
+
+			button:hover {
+				background: #074063;
+			}
+
+			.switch {
+				text-align: center;
+				margin-top: 20px;
+			}
+
+			.switch a {
+				color: #fff;
+				text-decoration: underline;
+				cursor: pointer;
+			}
+
+			.mensaje {
+				margin-top: 15px;
+				text-align: center;
+				font-size: 14px;
+				color: yellow;
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container" id="loginBox">
+			<h2>Iniciar Sesión</h2>
+
+			<div class="input-group">
+				<label>Correo electrónico</label>
+				<input type="email" id="emailLogin" placeholder="Ingresa tu correo" />
+			</div>
+
+			<div class="input-group">
+				<label>Contraseña</label>
+				<input type="password" id="passwordLogin" placeholder="Ingresa tu contraseña" />
+			</div>
+
+			<button onclick="login()">Ingresar</button>
+
+			<p class="switch">¿No tienes cuenta? <a onclick="mostrarRegistro()">Regístrate aquí</a></p>
+
+			<p class="mensaje" id="mensajeLogin"></p>
+		</div>
+
+		<div class="container" id="registerBox" style="display: none">
+			<h2>Registro</h2>
+
+			<div class="input-group">
+				<label>Nombre completo</label>
+				<input type="text" id="nombreReg" placeholder="Tu nombre" />
+			</div>
+
+			<div class="input-group">
+				<label>Usuario</label>
+				<input type="text" id="usuarioReg" placeholder="Crea un usuario" />
+			</div>
+
+			<div class="input-group">
+				<label>Correo</label>
+				<input type="email" id="correoReg" placeholder="ejemplo@mail.com" />
+			</div>
+
+			<div class="input-group">
+				<label>Contraseña</label>
+				<input type="password" id="passwordReg" placeholder="Crea una contraseña" />
+			</div>
+
+			<button onclick="registrar()">Crear cuenta</button>
+
+			<p class="switch">¿Ya tienes cuenta? <a onclick="mostrarLogin()">Inicia sesión</a></p>
+
+			<p class="mensaje" id="mensajeReg"></p>
+		</div>
+
+		<script>
+			function mostrarRegistro() {
+				document.getElementById("loginBox").style.display = "none";
+				document.getElementById("registerBox").style.display = "block";
+			}
+
+			function mostrarLogin() {
+				document.getElementById("registerBox").style.display = "none";
+				document.getElementById("loginBox").style.display = "block";
+			}
+
+			function login() {
+				const email = document.getElementById("emailLogin").value;
+				const pass = document.getElementById("passwordLogin").value;
+				const msg = document.getElementById("mensajeLogin");
+
+				if (email === "" || pass === "") {
+					msg.textContent = "Completa todos los campos.";
+					msg.style.display = "block";
+					return;
+				}
+
+				msg.textContent = "Validando...";
+				msg.style.display = "block";
+
+				fetch("/api/login", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ email, password: pass }),
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							localStorage.setItem("userId", data.userId);
+							msg.textContent = "Login exitoso. Redirigiendo...";
+							setTimeout(() => {
+								window.location.href = "dashboard.html";
+							}, 1000);
+						} else {
+							msg.textContent = data.message || "Credenciales inválidas.";
+							msg.style.display = "block";
+						}
+					})
+					.catch((error) => {
+						console.error("Error:", error);
+						msg.textContent = "Error de conexión.";
+						msg.style.display = "block";
+					});
+			}
+
+			function registrar() {
+				const nombre = document.getElementById("nombreReg").value;
+				const usuario = document.getElementById("usuarioReg").value;
+				const correo = document.getElementById("correoReg").value;
+				const pass = document.getElementById("passwordReg").value;
+				const msg = document.getElementById("mensajeReg");
+
+				if (nombre === "" || usuario === "" || correo === "" || pass === "") {
+					msg.textContent = "Completa todos los campos.";
+					msg.style.display = "block";
+					return;
+				}
+
+				msg.textContent = "Registrando...";
+				msg.style.display = "block";
+
+				fetch("/api/register", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ name: nombre, username: usuario, email: correo, password: pass }),
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							msg.textContent = "Registro exitoso. Ahora puedes iniciar sesión.";
+							msg.style.color = "green";
+							// Limpiar campos del registro
+							document.getElementById("nombreReg").value = "";
+							document.getElementById("usuarioReg").value = "";
+							document.getElementById("correoReg").value = "";
+							document.getElementById("passwordReg").value = "";
+							setTimeout(() => {
+								mostrarLogin();
+								msg.style.display = "none";
+							}, 1000);
+						} else {
+							msg.textContent = data.message || "Error en el registro.";
+							msg.style.color = "yellow";
+							msg.style.display = "block";
+						}
+					})
+					.catch((error) => {
+						console.error("Error:", error);
+						msg.textContent = "Error de conexión.";
+						msg.style.display = "block";
+					});
+			}
+		</script>
+	</body>
+</html>

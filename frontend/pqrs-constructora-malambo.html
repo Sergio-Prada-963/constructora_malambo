@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>PQRS - Constructora Malambo</title>
+
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background: #f4f6f9;
+				margin: 0;
+				padding: 20px;
+			}
+			.container {
+				max-width: 1100px;
+				margin: auto;
+				background: white;
+				padding: 20px;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+			h1 {
+				text-align: center;
+				color: #2c3e50;
+			}
+			form {
+				display: grid;
+				grid-template-columns: repeat(2, 1fr);
+				gap: 10px;
+				margin-bottom: 20px;
+			}
+			input,
+			select,
+			textarea,
+			button {
+				padding: 8px;
+				border-radius: 5px;
+				border: 1px solid #ccc;
+			}
+			textarea {
+				grid-column: span 2;
+				resize: none;
+			}
+			button {
+				grid-column: span 2;
+				background: #27ae60;
+				color: white;
+				cursor: pointer;
+			}
+			button:hover {
+				background: #219150;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+			th,
+			td {
+				padding: 8px;
+				border-bottom: 1px solid #ddd;
+				text-align: center;
+			}
+			th {
+				background: #2c3e50;
+				color: white;
+			}
+			.estado-pendiente {
+				color: red;
+				font-weight: bold;
+			}
+			.estado-proceso {
+				color: orange;
+				font-weight: bold;
+			}
+			.estado-resuelto {
+				color: green;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<h1>📩 PQRS - Constructora Malambo</h1>
+
+			<h3>Enviar Solicitud</h3>
+
+			<form id="pqrsForm">
+				<input type="text" id="nombre" placeholder="Nombre completo" required />
+				<input type="email" id="correo" placeholder="Correo electrónico" required />
+
+				<select id="tipo" required>
+					<option value="">Seleccione tipo</option>
+					<option>Petición</option>
+					<option>Queja</option>
+					<option>Reclamo</option>
+					<option>Sugerencia</option>
+				</select>
+
+				<input type="text" id="asunto" placeholder="Asunto" required />
+
+				<textarea id="mensaje" rows="4" placeholder="Describa su solicitud..." required></textarea>
+
+				<button type="submit">Enviar Solicitud</button>
+			</form>
+
+			<h3>Seguimiento de Solicitudes</h3>
+
+			<input type="text" id="buscarRadicado" placeholder="Buscar por número de radicado" />
+			<br /><br />
+
+			<table>
+				<thead>
+					<tr>
+						<th>Radicado</th>
+						<th>Nombre</th>
+						<th>Tipo</th>
+						<th>Estado</th>
+						<th>Acciones</th>
+					</tr>
+				</thead>
+				<tbody id="tablaPQRS"></tbody>
+			</table>
+		</div>
+
+		<script>
+			let pqrs = JSON.parse(localStorage.getItem("pqrs")) || [];
+
+			const form = document.getElementById("pqrsForm");
+			const tabla = document.getElementById("tablaPQRS");
+			const buscarInput = document.getElementById("buscarRadicado");
+
+			function guardar() {
+				localStorage.setItem("pqrs", JSON.stringify(pqrs));
+			}
+
+			function generarRadicado() {
+				return "CM-" + Math.floor(Math.random() * 100000);
+			}
+
+			form.addEventListener("submit", (e) => {
+				e.preventDefault();
+
+				const nuevaSolicitud = {
+					radicado: generarRadicado(),
+					nombre: nombre.value,
+					correo: correo.value,
+					tipo: tipo.value,
+					asunto: asunto.value,
+					mensaje: mensaje.value,
+					estado: "Pendiente",
+					fecha: new Date().toLocaleDateString(),
+				};
+
+				pqrs.push(nuevaSolicitud);
+				guardar();
+				renderizar();
+				form.reset();
+			});
+
+			function renderizar(filtro = "") {
+				tabla.innerHTML = "";
+
+				pqrs.filter((p) => p.radicado.includes(filtro)).forEach((p, index) => {
+					let claseEstado = "";
+					if (p.estado === "Pendiente") claseEstado = "estado-pendiente";
+					if (p.estado === "En Proceso") claseEstado = "estado-proceso";
+					if (p.estado === "Resuelto") claseEstado = "estado-resuelto";
+
+					tabla.innerHTML += `
+        <tr>
+            <td>${p.radicado}</td>
+            <td>${p.nombre}</td>
+            <td>${p.tipo}</td>
+            <td class="${claseEstado}">${p.estado}</td>
+            <td>
+                <button onclick="cambiarEstado(${index})">Cambiar Estado</button>
+            </td>
+        </tr>
+        `;
+				});
+			}
+
+			function cambiarEstado(index) {
+				if (pqrs[index].estado === "Pendiente") {
+					pqrs[index].estado = "En Proceso";
+				} else if (pqrs[index].estado === "En Proceso") {
+					pqrs[index].estado = "Resuelto";
+				} else {
+					pqrs[index].estado = "Pendiente";
+				}
+
+				guardar();
+				renderizar();
+			}
+
+			buscarInput.addEventListener("keyup", () => {
+				renderizar(buscarInput.value);
+			});
+
+			renderizar();
+		</script>
+	</body>
+</html>

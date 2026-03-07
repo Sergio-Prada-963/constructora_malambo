@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Dashboard - Constructora Malambo</title>
+
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: "Poppins", sans-serif;
+			}
+
+			body {
+				background: #ffffff;
+				color: #2f3a4d;
+				scroll-behavior: smooth;
+			}
+
+			/* HEADER */
+			header {
+				background: #1a1f2b;
+				color: white;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				position: sticky;
+				top: 0;
+				z-index: 1000;
+			}
+
+			header h1 span {
+				color: #d4a039;
+			}
+
+			nav a {
+				color: white;
+				margin-left: 25px;
+				text-decoration: none;
+				font-weight: 500;
+				transition: 0.3s;
+			}
+			nav a:hover {
+				color: #d4a039;
+			}
+
+			/* HERO SLIDER */
+			.hero {
+				height: 60vh;
+				position: relative;
+				overflow: hidden;
+				background: linear-gradient(135deg, #1a1f2b, #2f3a4d);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
+
+			.hero-content h2 {
+				font-size: 48px;
+				color: white;
+				margin-bottom: 20px;
+			}
+			.hero-content p {
+				font-size: 18px;
+				color: #d4a039;
+			}
+
+			/* SECTION */
+			.section {
+				padding: 80px 50px;
+				text-align: center;
+			}
+
+			.section h2 {
+				font-size: 36px;
+				margin-bottom: 20px;
+			}
+
+			.subtitle {
+				color: #666;
+				margin-bottom: 50px;
+			}
+
+			/* GRID */
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+				gap: 30px;
+			}
+
+			.card {
+				background: white;
+				border-radius: 15px;
+				overflow: hidden;
+				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+				transition: 0.3s;
+				opacity: 0;
+				transform: translateY(40px);
+			}
+
+			.card.show {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			.card:hover {
+				transform: translateY(-10px);
+				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+			}
+
+			.card img {
+				width: 100%;
+				height: 200px;
+				object-fit: cover;
+			}
+
+			.card-content {
+				padding: 20px;
+				text-align: left;
+			}
+
+			.card-content h3 {
+				font-size: 24px;
+				margin-bottom: 10px;
+			}
+
+			.card-content p {
+				color: #666;
+				margin-bottom: 15px;
+			}
+
+			.card button {
+				padding: 10px 15px;
+				border: none;
+				background: #1a1f2b;
+				color: white;
+				border-radius: 6px;
+				cursor: pointer;
+				transition: 0.3s;
+			}
+
+			.card button:hover {
+				background: #d4a039;
+			}
+
+			/* POPUP */
+			.popup {
+				display: none;
+				position: fixed;
+				z-index: 10000;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0, 0, 0, 0.5);
+			}
+
+			.popup-content {
+				background-color: white;
+				margin: 15% auto;
+				padding: 20px;
+				border: 1px solid #888;
+				width: 80%;
+				max-width: 500px;
+				border-radius: 10px;
+				position: relative;
+			}
+
+			.close {
+				color: #aaa;
+				float: right;
+				font-size: 28px;
+				font-weight: bold;
+				cursor: pointer;
+			}
+
+			.close:hover {
+				color: black;
+			}
+
+			/* BOTÓN FLOTANTE */
+			.fab {
+				position: fixed;
+				bottom: 30px;
+				right: 30px;
+				width: 60px;
+				height: 60px;
+				background: #d4a039;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+				transition: 0.3s;
+				z-index: 1000;
+			}
+
+			.fab:hover {
+				background: #b8952d;
+				transform: scale(1.1);
+			}
+
+			.fab::before {
+				content: "+";
+				font-size: 30px;
+				color: white;
+				font-weight: bold;
+			}
+
+			footer {
+				background: #1a1f2b;
+				color: white;
+				text-align: center;
+				padding: 20px;
+				margin-top: 50px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<h1>Constructora <span>Malambo</span></h1>
+			<nav>
+				<a href="#proyectos">Nuevos Proyectos</a>
+				<a href="profile.html">Mi Usuario</a>
+				<a href="payments.html">Mis Pagos</a>
+				<a href="lots.html">Mis Lotes</a>
+				<a href="/pqr.html">PQR</a>
+				<a href="#" onclick="logout()">Cerrar Sesión</a>
+			</nav>
+		</header>
+
+		<!-- HERO -->
+		<section class="hero">
+			<div class="hero-content">
+				<h2>Bienvenido a tu Dashboard</h2>
+				<p>Gestiona tus proyectos y pagos de manera fácil</p>
+			</div>
+		</section>
+
+		<!-- NUEVOS PROYECTOS -->
+		<section class="section" id="proyectos">
+			<h2>Nuevos Proyectos Disponibles</h2>
+			<p class="subtitle">Descubre las últimas oportunidades inmobiliarias.</p>
+			<div id="projectsGrid" class="grid"></div>
+		</section>
+
+		<!-- BOTÓN FLOTANTE -->
+		<div class="fab" onclick="crearNuevoProyecto()"></div>
+
+		<footer>© 2026 Constructora Malambo – Todos los derechos reservados</footer>
+
+		<!-- POPUP COMPRA -->
+		<div id="buyPopup" class="popup">
+			<div class="popup-content">
+				<span class="close" onclick="closeBuyPopup()">&times;</span>
+				<h2>Comprar Proyecto</h2>
+				<div class="input-group">
+					<label>Nombre del Proyecto</label>
+					<input type="text" id="buyProjectName" readonly />
+				</div>
+				<div class="input-group">
+					<label>Valor Total</label>
+					<input type="number" id="buyProjectValue" readonly />
+				</div>
+				<div class="input-group">
+					<label>Número de Cuotas</label>
+					<select id="buyCuotas" onchange="calculateMonthly()">
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3</option>
+						<option value="4">4</option>
+						<option value="5">5</option>
+						<option value="6">6</option>
+						<option value="7">7</option>
+						<option value="8">8</option>
+						<option value="9">9</option>
+						<option value="10">10</option>
+						<option value="11">11</option>
+						<option value="12">12</option>
+					</select>
+				</div>
+				<div class="input-group">
+					<label>Valor Mensual (con 12% interés)</label>
+					<input type="number" id="buyMonthlyValue" readonly />
+				</div>
+				<button class="btn" onclick="buyProject()">Comprar</button>
+			</div>
+		</div>
+
+		<script>
+			// ANIMACIÓN SCROLL
+			const cards = document.querySelectorAll(".card");
+			window.addEventListener("scroll", () => {
+				cards.forEach((card) => {
+					let position = card.getBoundingClientRect().top;
+					let screen = window.innerHeight;
+					if (position < screen - 100) {
+						card.classList.add("show");
+					}
+				});
+			});
+
+			// SCROLL SUAVE
+			document.querySelectorAll("nav a").forEach((anchor) => {
+				anchor.addEventListener("click", function (e) {
+					const href = this.getAttribute("href");
+					if (href.startsWith("#")) {
+						e.preventDefault();
+						const target = document.querySelector(href);
+						target.scrollIntoView({ behavior: "smooth" });
+					}
+					// For non-hash links, let the browser handle navigation
+				});
+			});
+
+			function crearNuevoProyecto() {
+				window.location.href = "/project-create.html";
+			}
+
+			function logout() {
+				localStorage.removeItem("userId");
+				window.location.href = "index.html";
+			}
+
+			// Cargar proyectos dinámicamente
+			async function loadProjectsDashboard() {
+				try {
+					const res = await fetch("/api/projects");
+					const data = await res.json();
+					const grid = document.getElementById("projectsGrid");
+					grid.innerHTML = "";
+					if (!data.success) {
+						grid.innerText = "Error cargando proyectos";
+						return;
+					}
+					data.projects.forEach((p) => {
+						const card = document.createElement("div");
+						card.className = "card show";
+						card.innerHTML = `
+							<img src="${p.img || "https://via.placeholder.com/600x400"}" />
+							<div class="card-content">
+								<h3>${p.nombre}</h3>
+								<p>${p.descripcion || ""}</p>
+								<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+									<span style="font-weight:700;color:#d4a039">$${Number(p.precio).toLocaleString()}</span>
+									<div>
+										<span style="background:#eef2ff;color:#1a1f2b;padding:6px 8px;border-radius:8px;margin-right:8px;font-size:13px">${p.etapa || ""}</span>
+										<button class="btn" onclick="openBuyPopup(${p.id}, ${JSON.stringify(p.nombre)}, ${p.precio})">Comprar</button>
+										<a class="btn" href="/project-edit.html?id=${p.id}">Editar</a>
+									</div>
+								</div>
+							</div>
+						`;
+						grid.appendChild(card);
+					});
+				} catch (err) {
+					console.error(err);
+					document.getElementById("projectsGrid").innerText = "Error de conexión";
+				}
+			}
+
+			window.addEventListener("DOMContentLoaded", loadProjectsDashboard);
+
+			let currentBuyProjectId = null;
+
+			function openBuyPopup(id, name, value) {
+				currentBuyProjectId = id;
+				document.getElementById("buyProjectName").value = name;
+				document.getElementById("buyProjectValue").value = value;
+				document.getElementById("buyCuotas").value = 1;
+				calculateMonthly();
+				document.getElementById("buyPopup").style.display = "block";
+			}
+
+			function closeBuyPopup() {
+				document.getElementById("buyPopup").style.display = "none";
+			}
+
+			function calculateMonthly() {
+				const value = parseFloat(document.getElementById("buyProjectValue").value);
+				const cuotas = parseInt(document.getElementById("buyCuotas").value);
+				const base = value / cuotas;
+				const intereses = base * 0.12;
+				const total = base + intereses;
+				document.getElementById("buyMonthlyValue").value = total.toFixed(2);
+			}
+
+			function buyProject() {
+				const userId = localStorage.getItem("userId");
+				if (!userId) {
+					alert("No has iniciado sesión");
+					return;
+				}
+				const cuotas = parseInt(document.getElementById("buyCuotas").value);
+				const monthlyValue = parseFloat(document.getElementById("buyMonthlyValue").value);
+				const totalValue = parseFloat(document.getElementById("buyProjectValue").value);
+
+				fetch("/api/buy-project", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						userId: parseInt(userId),
+						projectId: currentBuyProjectId,
+						cuotas,
+						valorCuota: monthlyValue,
+						valorTotal: totalValue
+					})
+				})
+				.then(res => res.json())
+				.then(data => {
+					if (data.success) {
+						alert("Compra realizada exitosamente");
+						closeBuyPopup();
+						// Opcional: recargar proyectos o redirigir
+					} else {
+						alert("Error: " + data.message);
+					}
+				})
+				.catch(err => {
+					console.error(err);
+					alert("Error de conexión");
+				});
+			}
+		</script>
+	</body>
+</html>

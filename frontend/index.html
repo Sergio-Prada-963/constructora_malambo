@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Constructora Malambo</title>
+
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: "Poppins", sans-serif;
+			}
+
+			body {
+				background: #ffffff;
+				color: #2f3a4d;
+				scroll-behavior: smooth;
+			}
+
+			/* HEADER */
+			header {
+				background: #1a1f2b;
+				color: white;
+				padding: 20px 50px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				position: sticky;
+				top: 0;
+				z-index: 1000;
+			}
+
+			header h1 span {
+				color: #d4a039;
+			}
+
+			nav a {
+				color: white;
+				margin-left: 25px;
+				text-decoration: none;
+				font-weight: 500;
+				transition: 0.3s;
+			}
+			nav a:hover {
+				color: #d4a039;
+			}
+
+			/* HERO SLIDER */
+			.hero {
+				height: 90vh;
+				position: relative;
+				overflow: hidden;
+			}
+
+			.slide {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				background-size: cover;
+				background-position: center;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				padding-left: 60px;
+				color: white;
+				opacity: 0;
+				transition: opacity 1s ease-in-out;
+			}
+
+			.slide.active {
+				opacity: 1;
+			}
+
+			.slide::before {
+				content: "";
+				position: absolute;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.55);
+			}
+
+			.slide-content {
+				position: relative;
+				max-width: 600px;
+			}
+
+			.slide h2 {
+				font-size: 48px;
+			}
+			.slide p {
+				margin: 20px 0;
+				font-size: 18px;
+			}
+			.slide button {
+				padding: 14px 28px;
+				border: none;
+				background: #d4a039;
+				color: white;
+				border-radius: 8px;
+				cursor: pointer;
+			}
+
+			/* SECTION */
+			.section {
+				padding: 80px 50px;
+				text-align: center;
+			}
+
+			.section h2 {
+				font-size: 36px;
+				margin-bottom: 20px;
+			}
+
+			.subtitle {
+				color: #666;
+				margin-bottom: 50px;
+			}
+
+			/* PROYECTOS */
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
+				gap: 30px;
+			}
+
+			.card {
+				background: white;
+				border-radius: 15px;
+				overflow: hidden;
+				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+				transition: 0.3s;
+				opacity: 0;
+				transform: translateY(40px);
+			}
+			.filtro-btn {
+				padding: 10px 18px;
+				margin: 5px;
+				border: none;
+				background: #1a1f2b;
+				color: white;
+				border-radius: 6px;
+				cursor: pointer;
+				transition: 0.3s;
+			}
+
+			.filtro-btn:hover {
+				background: #d4a039;
+			}
+
+			.card button {
+				margin-top: 10px;
+				padding: 8px 12px;
+				border: none;
+				background: #1a1f2b;
+				color: white;
+				border-radius: 6px;
+				cursor: pointer;
+				transition: 0.3s;
+			}
+
+			.card button:hover {
+				background: #d4a039;
+			}
+
+			.card.show {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			.card:hover {
+				transform: translateY(-10px);
+				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+			}
+
+			.card img {
+				width: 100%;
+				height: 220px;
+				object-fit: cover;
+			}
+
+			.card-content {
+				padding: 20px;
+				text-align: left;
+			}
+
+			.price {
+				color: #d4a039;
+				font-weight: 700;
+				margin: 10px 0;
+				display: block;
+			}
+
+			/* CONTADOR */
+			.stats {
+				background: #1a1f2b;
+				color: white;
+				display: flex;
+				justify-content: space-around;
+				padding: 60px 20px;
+				flex-wrap: wrap;
+			}
+
+			.stat {
+				text-align: center;
+				margin: 20px;
+			}
+
+			.stat h3 {
+				font-size: 40px;
+				color: #d4a039;
+			}
+
+			/* TESTIMONIOS */
+			.testimonial {
+				background: #f7f7f7;
+				padding: 30px;
+				border-radius: 12px;
+			}
+
+			/* MAPA */
+			iframe {
+				width: 100%;
+				height: 350px;
+				border: none;
+				border-radius: 12px;
+			}
+
+			/* CONTACTO */
+			form {
+				max-width: 600px;
+				margin: auto;
+				display: flex;
+				flex-direction: column;
+				gap: 15px;
+			}
+
+			input,
+			textarea {
+				padding: 12px;
+				border-radius: 8px;
+				border: 1px solid #ccc;
+				font-size: 16px;
+			}
+
+			button.submit {
+				background: #d4a039;
+				color: white;
+				border: none;
+				padding: 14px;
+				border-radius: 8px;
+				cursor: pointer;
+			}
+
+			footer {
+				background: #1a1f2b;
+				color: white;
+				text-align: center;
+				padding: 20px;
+				margin-top: 50px;
+			}
+
+			/* Modal detalles */
+			.modal-overlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.65);
+				display: none;
+				align-items: center;
+				justify-content: center;
+				z-index: 2000;
+				backdrop-filter: blur(4px);
+			}
+			.modal {
+				background: white;
+				width: 95%;
+				max-width: 1100px;
+				border-radius: 14px;
+				overflow: hidden;
+				display: flex;
+				flex-direction: row;
+				box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+				transform: translateY(0);
+				transition:
+					transform 180ms ease,
+					opacity 180ms ease;
+			}
+			.modal-left img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				display: block;
+			}
+			.modal-left {
+				flex: 0 0 50%;
+				min-height: 320px;
+			}
+			.modal-right {
+				padding: 28px 28px;
+				flex: 1 1 auto;
+				position: relative;
+			}
+			.modal-right h3 {
+				margin-bottom: 8px;
+				font-size: 26px;
+			}
+			.modal-row {
+				display: flex;
+				gap: 12px;
+				flex-wrap: wrap;
+				margin-top: 14px;
+			}
+			.modal-field {
+				background: #f7f7f8;
+				padding: 10px 12px;
+				border-radius: 10px;
+				font-size: 14px;
+				color: #333;
+			}
+			.modal-close {
+				position: absolute;
+				right: 14px;
+				top: 10px;
+				background: #fff;
+				border: none;
+				font-size: 20px;
+				cursor: pointer;
+				border-radius: 8px;
+				padding: 6px 8px;
+				box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+			}
+			.modal-right .price {
+				font-size: 22px;
+			}
+			@media (max-width: 900px) {
+				.modal {
+					flex-direction: column;
+				}
+				.modal-left {
+					flex: 0 0 auto;
+					min-height: 200px;
+				}
+				.modal-right {
+					padding: 18px;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<h1>Constructora <span>Malambo</span></h1>
+			<nav>
+				<a href="#proyectos">Proyectos</a>
+				<a href="#estadisticas">Nosotros</a>
+				<a href="#contacto">Contacto</a>
+				<a href="login.html">Ingresar</a>
+			</nav>
+		</header>
+
+		<!-- HERO SLIDER -->
+		<section class="hero">
+			<div class="slide active" style="background-image: url(&quot;https://images.pexels.com/photos/585419/pexels-photo-585419.jpeg&quot;)">
+				<div class="slide-content">
+					<h2>Construimos el futuro</h2>
+					<p>Proyectos modernos con calidad y respaldo garantizado.</p>
+					<button onclick="scrollToSection('proyectos')">Ver Proyectos</button>
+				</div>
+			</div>
+
+			<div class="slide" style="background-image: url(&quot;https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg&quot;)">
+				<div class="slide-content">
+					<h2>Espacios que inspiran</h2>
+					<p>Diseñamos hogares pensando en tu bienestar.</p>
+					<button onclick="scrollToSection('contacto')">Contáctanos</button>
+				</div>
+			</div>
+		</section>
+
+		<!-- PROYECTOS -->
+		<section class="section" id="proyectos">
+			<h2>Proyectos en Venta</h2>
+			<p class="subtitle">Descubre nuestras mejores oportunidades inmobiliarias.</p>
+			<div class="grid" id="projectsGrid">
+				<div class="card" data-type="apartamento">
+					<img src="https://img.fazwaz.com/eyJidWNrZXQiOiJwcmQtbGlmdWxsY29ubmVjdC1iYWNrZW5kLWIyYi1pbWFnZXMiLCJrZXkiOiJwcm9wZXJ0aWVzXC8wMTk1MTU2Mi1kYWRmLTc2NjQtYmVkOS0yMDMxZjhhYTRmYjlcLzAxOTUxNTYyLWUxNmMtNzNhNC1iYzY5LThjMzNjNDMzZTMwZS5wbmciLCJlZGl0cyI6eyJyb3RhdGUiOm51bGwsInJlc2l6ZSI6eyJ3aWR0aCI6MzU1LCJoZWlnaHQiOjI0MCwiZml0IjoiY292ZXIifX19" />
+					<div class="card-content">
+						<h3>Lotes de palmas del Norte</h3>
+						<p>Proyectos de apartamentos modernos con zonas sociales.</p>
+						<span class="price">$180.000.000</span>
+						<button onclick="detalle('Lotes de palmas del Norte')">Ver detalles</button>
+					</div>
+				</div>
+
+				<div class="card" data-type="Lote">
+					<img src="https://media-archive.informeinmobiliario.com/site_images/Lotes-venta-green%20park-barranquilla-plano.png" />
+					<div class="card-content">
+						<h3>Lotes de Brisas del Caribe</h3>
+						<p>Lotes familiares amplias y seguras.</p>
+						<span class="price">$250.000.000</span>
+						<button onclick="detalle('Lote de Brisas del Caribe')">Ver detalles</button>
+					</div>
+				</div>
+
+				<div class="card" data-type="vis">
+					<img src="https://mchaileh.com/wp-content/uploads/2025/03/10264_1_11920025.png" />
+					<div class="card-content">
+						<h3>Lote Horizonte</h3>
+						<p>Proyecto de lotes con subsidios disponibles.</p>
+						<span class="price">$120.000.000</span>
+						<button onclick="detalle('Lote Horizonte')">Ver detalles</button>
+					</div>
+				</div>
+
+				<div class="card" data-type="apartamento">
+					<img src="https://img.resemmedia.com/eyJidWNrZXQiOiJwcmQtbGlmdWxsY29ubmVjdC1iYWNrZW5kLWIyYi1pbWFnZXMiLCJrZXkiOiJpbmdlc3Rlci8wMTk0ZDg0NC05OGVjLTcwNjItYmRmOS1kOGI3ODg0NTZlODkvNGJiNzQ2NmYzNmYyYWUxNGQ4ZGViMjExMGRkMzM0Y2RmNDdmNGZiYTg5M2I4OGE1MDg4ZmI1N2NjMmYwOTg3YS5qcGVnIiwiYnJhbmQiOiJyZXNlbSIsImVkaXRzIjp7InJvdGF0ZSI6bnVsbCwicmVzaXplIjp7IndpZHRoIjozNTQsImhlaWdodCI6MjQwLCJmaXQiOiJjb3ZlciJ9fX0=" />
+					<div class="card-content">
+						<h3>Lotes de Vista Real</h3>
+						<p>Apartamentos de lujo con piscina.</p>
+						<span class="price">$220.000.000</span>
+						<button onclick="detalle('Lote Vista Real')">Ver detalles</button>
+					</div>
+				</div>
+
+				<div class="card" data-type="lote">
+					<img src="https://multimedia.metrocuadrado.com/16432-C0010-01/16432-C0010-01_1_V1_x.jpg" />
+					<div class="card-content">
+						<h3>Villa Campestre</h3>
+						<p>Casas campestres con amplias zonas verdes.</p>
+						<span class="price">$310.000.000</span>
+						<button onclick="detalle('Lote Villa Campestre')">Ver detalles</button>
+					</div>
+				</div>
+
+				<div class="card" data-type="vis">
+					<img src="https://img.fazwaz.com/eyJidWNrZXQiOiJwcmQtbGlmdWxsY29ubmVjdC1iYWNrZW5kLWIyYi1pbWFnZXMiLCJrZXkiOiJpbmdlc3RlclwvMDE5NGIwMTQtZTNiYS03MzAyLWE0N2QtYTYzMzQxN2ExMDIxXC9lOGM1ZjZlN2RiMzcwNDY4NDU5MzcxM2U2ZTVmMGYxMmRlYTY4NThlZGRjYjZmNGY0MzJjYmM4MGZkNDY4MDQ3LmpwZWciLCJlZGl0cyI6eyJyb3RhdGUiOm51bGwsInJlc2l6ZSI6eyJ3aWR0aCI6MzU1LCJoZWlnaHQiOjI0MCwiZml0IjoiY292ZXIifX19" />
+					<div class="card-content">
+						<h3>Lotes de Altos del Parque</h3>
+						<p>Vivienda de interés social en ubicación estratégica.</p>
+						<span class="price">$128.000.000</span>
+						<button onclick="detalle('Lotes de altos del Parque')">Ver detalles</button>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- ESTADISTICAS -->
+		<section class="stats" id="estadisticas">
+			<div class="stat">
+				<h3 class="counter" data-target="15">0</h3>
+				<p>Años de experiencia</p>
+			</div>
+
+			<div class="stat">
+				<h3 class="counter" data-target="120">0</h3>
+				<p>Proyectos entregados</p>
+			</div>
+
+			<div class="stat">
+				<h3 class="counter" data-target="500">0</h3>
+				<p>Familias felices</p>
+			</div>
+		</section>
+
+		<!-- TESTIMONIOS -->
+		<section class="section">
+			<h2>Testimonios</h2>
+			<div class="grid">
+				<div class="testimonial">
+					<p>"Excelente calidad y cumplimiento en la entrega."</p>
+					<strong>- María González</strong>
+				</div>
+
+				<div class="testimonial">
+					<p>"Mi familia está feliz con nuestro nuevo hogar."</p>
+					<strong>- Carlos Pérez</strong>
+				</div>
+			</div>
+		</section>
+
+		<!-- MAPA -->
+		<section class="section">
+			<h2>Ubicación</h2>
+			<iframe src="https://www.google.com/maps?q=Barranquilla&output=embed"></iframe>
+		</section>
+
+		<!-- CONTACTO -->
+		<section class="section" id="contacto">
+			<h2>Contáctanos</h2>
+			<form id="contactForm" action="https://formsubmit.co/jesuscampo2311@email.com" method="POST">
+				<input type="text" id="name" placeholder="Nombre completo" required />
+				<input type="email" id="email" placeholder="Correo electrónico" required />
+				<textarea rows="4" id="message" placeholder="Mensaje" required></textarea>
+				<button type="submit" class="submit">Enviar</button>
+			</form>
+		</section>
+
+		<footer>© 2026 Constructora Malambo – Todos los derechos reservados</footer>
+
+		<!-- Modal de detalles -->
+		<div id="projectModalOverlay" class="modal-overlay" aria-hidden="true">
+			<div class="modal" role="dialog" aria-modal="true">
+				<div class="modal-left">
+					<img id="modalImg" src="" alt="Imagen proyecto" />
+				</div>
+				<div class="modal-right">
+					<button id="modalClose" class="modal-close">✕</button>
+					<h3 id="modalTitle"></h3>
+					<p id="modalDesc"></p>
+					<div class="modal-row" id="modalFields"></div>
+					<div style="margin-top: 16px">
+						<span class="price" id="modalPrice"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			// SLIDER
+			let slides = document.querySelectorAll(".slide");
+			let index = 0;
+			setInterval(() => {
+				slides[index].classList.remove("active");
+				index = (index + 1) % slides.length;
+				slides[index].classList.add("active");
+			}, 5000);
+
+			// SCROLL
+			function scrollToSection(id) {
+				document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+			}
+
+			// ANIMACION SCROLL
+			const cards = document.querySelectorAll(".card");
+			window.addEventListener("scroll", () => {
+				cards.forEach((card) => {
+					let position = card.getBoundingClientRect().top;
+					let screen = window.innerHeight;
+					if (position < screen - 100) {
+						card.classList.add("show");
+					}
+				});
+			});
+
+			// CONTADOR
+			const counters = document.querySelectorAll(".counter");
+			counters.forEach((counter) => {
+				const update = () => {
+					const target = +counter.getAttribute("data-target");
+					const count = +counter.innerText;
+					const increment = target / 200;
+					if (count < target) {
+						counter.innerText = Math.ceil(count + increment);
+						setTimeout(update, 10);
+					} else {
+						counter.innerText = target;
+					}
+				};
+				update();
+			});
+
+			// VALIDACION FORMULARIO
+			document.getElementById("contactForm").addEventListener("submit", function (e) {
+				e.preventDefault();
+				alert("Gracias por contactarnos. Te responderemos pronto.");
+				this.reset();
+			});
+			function filtrar(tipo) {
+				let cards = document.querySelectorAll(".card");
+
+				cards.forEach((card) => {
+					if (tipo === "all") {
+						card.style.display = "block";
+					} else {
+						if (card.getAttribute("data-type") === tipo) {
+							card.style.display = "block";
+						} else {
+							card.style.display = "none";
+						}
+					}
+				});
+			}
+
+			// Mostrar modal con detalles del proyecto por id
+			function detalle(id) {
+				const projects = window.projectsData || [];
+				const p = projects.find((x) => x.id === id);
+				if (!p) return alert("Proyecto no encontrado");
+
+				document.getElementById("modalImg").src = p.img || "https://via.placeholder.com/600x400";
+				document.getElementById("modalTitle").innerText = p.nombre || "";
+				document.getElementById("modalDesc").innerText = p.descripcion || "";
+				document.getElementById("modalPrice").innerText = `$${Number(p.precio).toLocaleString()}`;
+
+				const fields = document.getElementById("modalFields");
+				fields.innerHTML = "";
+				const addField = (label, value) => {
+					const el = document.createElement("div");
+					el.className = "modal-field";
+					el.innerText = `${label}: ${value}`;
+					fields.appendChild(el);
+				};
+
+				addField("Ubicación", p.ubicacion || "-");
+				addField("Largo", p.largo || 0);
+				addField("Ancho", p.ancho || 0);
+				addField("Baños", p.banos || 0);
+				addField("Habitaciones", p.habitaciones || 0);
+				addField("Comedor", p.comedor || 0);
+				addField("Sala", p.sala || 0);
+				addField("Cocina", p.cocina || 0);
+				addField("Cantidad disponible", p.cantidad_disponible || 0);
+
+				const overlay = document.getElementById("projectModalOverlay");
+				overlay.style.display = "flex";
+				overlay.setAttribute("aria-hidden", "false");
+			}
+
+			// Cerrar modal
+			(function setupModal() {
+				const overlay = document.getElementById("projectModalOverlay");
+				const closeBtn = document.getElementById("modalClose");
+				function close() {
+					overlay.style.display = "none";
+					overlay.setAttribute("aria-hidden", "true");
+				}
+				closeBtn.addEventListener("click", close);
+				overlay.addEventListener("click", (e) => {
+					if (e.target === overlay) close();
+				});
+				document.addEventListener("keydown", (e) => {
+					if (e.key === "Escape") close();
+				});
+			})();
+
+			// Cargar proyectos desde la API y renderizar
+			async function loadProjects() {
+				try {
+					const res = await fetch("/api/projects");
+					if (!res.ok) throw new Error("Error fetching projects");
+					const data = await res.json();
+					const grid = document.getElementById("projectsGrid");
+					if (!data.success) return;
+					grid.innerHTML = "";
+					// Guardar datos globalmente para el modal
+					window.projectsData = data.projects;
+
+					// Agrupar por etapas en orden fijo
+					const etapasOrder = ["planificacion", "Diseño", "Preconstruccion", "Ejecuccion", "Cierre y entrega"];
+
+					// Crear secciones por etapa
+					etapasOrder.forEach((etapa) => {
+						const section = document.createElement("div");
+						section.className = "section";
+						const title = document.createElement("h2");
+						title.innerText = etapa.charAt(0).toUpperCase() + etapa.slice(1);
+						section.appendChild(title);
+
+						const subtitle = document.createElement("p");
+						subtitle.className = "subtitle";
+						subtitle.innerText = "";
+						section.appendChild(subtitle);
+
+						const localGrid = document.createElement("div");
+						localGrid.className = "grid";
+
+						const items = data.projects.filter((p) => (p.etapa || "planificacion") === etapa);
+						items.forEach((p) => {
+							const card = document.createElement("div");
+							card.className = "card show";
+							card.innerHTML = `
+								<img src="${p.img || "https://via.placeholder.com/600x400"}" />
+								<div class="card-content">
+									<h3>${p.nombre}</h3>
+									<p>${p.descripcion || ""}</p>
+									<span class="price">$${Number(p.precio).toLocaleString()}</span>
+									<button onclick="detalle(${p.id})">Ver detalles</button>
+								</div>
+							`;
+							localGrid.appendChild(card);
+						});
+
+						if (items.length > 0) {
+							section.appendChild(localGrid);
+							grid.appendChild(section);
+						}
+					});
+				} catch (err) {
+					console.error("No se pudieron cargar los proyectos:", err);
+				}
+			}
+
+			// Llamar al cargar la página
+			window.addEventListener("DOMContentLoaded", loadProjects);
+		</script>
+	</body>
+</html>
