@@ -36,11 +36,28 @@ const { DB_HOST = "localhost", DB_PORT = 3306, DB_USER = "root", DB_PASSWORD = "
 		console.log("Tabla 'users' creada.");
 
 		// Crear tabla payments
+		// Determinar tipos de columna para claves foráneas (compatibilidad con esquemas existentes)
+		const getColumnType = async (table, column) => {
+			try {
+				const [rows] = await connection.query(
+					"SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?",
+					[DB_NAME, table, column]
+				);
+				if (rows && rows.length > 0) return rows[0].COLUMN_TYPE;
+				return null;
+			} catch (e) {
+				return null;
+			}
+		};
+
+		const userIdType = (await getColumnType("users", "id")) || "INT";
+		const projectIdType = (await getColumnType("projects", "id")) || "INT";
+
 		const createPaymentsSQL = `
 			CREATE TABLE IF NOT EXISTS payments (
 				id INT PRIMARY KEY AUTO_INCREMENT,
-				project_id INT,
-				user_id INT NOT NULL,
+				project_id ${projectIdType},
+				user_id ${userIdType} NOT NULL,
 				valor DECIMAL(15,2) NOT NULL,
 				cuotas_nro INT NOT NULL,
 				fecha_pago DATE NOT NULL,
@@ -57,8 +74,8 @@ const { DB_HOST = "localhost", DB_PORT = 3306, DB_USER = "root", DB_PASSWORD = "
 		const createUserLotesSQL = `
 			CREATE TABLE IF NOT EXISTS user_lotes (
 				id INT PRIMARY KEY AUTO_INCREMENT,
-				user_id INT NOT NULL,
-				project_id INT,
+				user_id ${userIdType} NOT NULL,
+				project_id ${projectIdType},
 				lote_name VARCHAR(255),
 				fecha_compra DATE NOT NULL,
 				numero_cuotas INT NOT NULL,
@@ -110,7 +127,9 @@ const { DB_HOST = "localhost", DB_PORT = 3306, DB_USER = "root", DB_PASSWORD = "
 		}
 
 		const [projRows] = await connection.query("SELECT id FROM projects LIMIT 1");
-		if (!projRows || projRows.length === 0) {
+		// Solo insertar proyectos de ejemplo si la tabla está vacía y tiene las columnas esperadas
+		const projectHasColumns = !!(await getColumnType("projects", "nombre"));
+		if ((!projRows || projRows.length === 0) && projectHasColumns) {
 			const sampleProjects = [
 				["https://images.pexels.com/photos/37347/house-home-sweet-home-architecture-37347.jpeg", "Lote Palmas del Norte", "Hermoso lote en zona tranquila, ideal para construir la casa de tus sueños.", 12.5, 10.0, 180000000, "Barranquilla", 1, 3, 1, 1, 1, 5, "planificacion", "disponible"],
 				["https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg", "Villa Campestre", "Casa campestre con amplias zonas verdes y acabado de lujo.", 20.0, 18.0, 310000000, "Zona Rural", 3, 4, 1, 1, 1, 2, "Diseño", "reservado"],
@@ -121,6 +140,8 @@ const { DB_HOST = "localhost", DB_PORT = 3306, DB_USER = "root", DB_PASSWORD = "
 				await connection.query("INSERT INTO projects (img, nombre, descripcion, largo, ancho, precio, ubicacion, banos, habitaciones, comedor, sala, cocina, cantidad_disponible, etapa, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", p);
 			}
 			console.log("Proyectos de ejemplo insertados.");
+		} else if (!projectHasColumns) {
+			console.log("La tabla 'projects' existe pero no tiene las columnas esperadas. No se insertaron ejemplos.");
 		} else {
 			console.log("La tabla projects ya tiene datos. No se insertaron ejemplos.");
 		}
@@ -132,10 +153,14 @@ const { DB_HOST = "localhost", DB_PORT = 3306, DB_USER = "root", DB_PASSWORD = "
 		const adminPlain = "123";
 		const saltRounds = 10;
 		const [rows] = await connection.query("SELECT id FROM users WHERE email = ?", [adminEmail]);
+		const usersHasUsername = !!(await getColumnType("users", "username"));
 		if (!rows || rows.length === 0) {
-			const saltRounds = 10;
 			const hash = await bcrypt.hash(adminPlain, saltRounds);
-			await connection.query("INSERT INTO users (name, username, email, password) VALUES (?, ?, ?, ?)", [adminName, adminUsername, adminEmail, hash]);
+			if (usersHasUsername) {
+				await connection.query("INSERT INTO users (name, username, email, password) VALUES (?, ?, ?, ?)", [adminName, adminUsername, adminEmail, hash]);
+			} else {
+				await connection.query("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", [adminName, adminEmail, hash]);
+			}
 			console.log("Usuario admin creado.");
 		} else {
 			console.log("Usuario admin ya existe, no se creó.");
@@ -149,7 +174,11 @@ const { DB_HOST = "localhost", DB_PORT = 3306, DB_USER = "root", DB_PASSWORD = "
 		const [testRows] = await connection.query("SELECT id FROM users WHERE email = ?", [testEmail]);
 		if (!testRows || testRows.length === 0) {
 			const hash = await bcrypt.hash(testPlain, saltRounds);
-			await connection.query("INSERT INTO users (id, name, username, email, password) VALUES (?, ?, ?, ?, ?)", [2, testName, testUsername, testEmail, hash]);
+			if (usersHasUsername) {
+				await connection.query("INSERT INTO users (id, name, username, email, password) VALUES (?, ?, ?, ?, ?)", [2, testName, testUsername, testEmail, hash]);
+			} else {
+				await connection.query("INSERT INTO users (id, name, email, password) VALUES (?, ?, ?, ?)", [2, testName, testEmail, hash]);
+			}
 			console.log("Usuario de prueba creado con id=2.");
 		}
 
@@ -170,7 +199,7 @@ const { DB_HOST = "localhost", DB_PORT = 3306, DB_USER = "root", DB_PASSWORD = "
 		const createPqrSQL = `
 			CREATE TABLE IF NOT EXISTS pqr (
 				id INT PRIMARY KEY AUTO_INCREMENT,
-				usuario_id INT,
+				usuario_id ${userIdType},
 				tipo_pqr VARCHAR(20) NOT NULL,
 				estado VARCHAR(50) DEFAULT 'radicad',
 				consecutivo VARCHAR(100) UNIQUE,
