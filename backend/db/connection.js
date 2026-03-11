@@ -1,5 +1,6 @@
 require("dotenv").config();
-const { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } = process.env;
+const TURSO_AUTH_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzMxNzk3OTcsImlkIjoiMDE5Y2Q5YzAtODAwMS03NjdkLTkyN2MtYzc2NDFlNTAwM2IzIiwicmlkIjoiMDFhYWUzYjUtOGEzMC00ZWZhLWJmZGMtOGFlNmE4ZThiZGM2In0.32A79nD5GSoqOUXwV6PW_jSs4rj5uSaudDeB9DN1u8KJazt0NKY3Cz8hyrcgNwVUniTT4jB6ER3MakIIT1b9Bg"
+const TURSO_DATABASE_URL= "libsql://constructora-malambo-vercel-icfg-g2qdowi50jqhsmdvdgbm1zai.aws-us-east-1.turso.io"
 
 if (!TURSO_DATABASE_URL) {
 	console.error("TURSO_DATABASE_URL is not set. This service requires Turso. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in environment.");
