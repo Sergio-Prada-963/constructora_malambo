@@ -9,14 +9,24 @@ if (TURSO_DATABASE_URL) {
 	// Provide a minimal `query` interface compatible with mysql2 pool.query
 	module.exports = {
 		execute: async (sql, params) => {
-			// alias for direct execute
-			const res = await client.execute(sql, params || []);
-			return res;
+			try {
+				const res = await client.execute(sql, params || []);
+				return res;
+			} catch (err) {
+				console.error("Turso execute error:", err && err.message ? err.message : err);
+				console.error(err && err.stack ? err.stack : err);
+				throw err;
+			}
 		},
 		query: async (sql, params) => {
-			const res = await client.execute(sql, params || []);
-			// return shape similar to mysql2: [rows, fields]
-			return [res.rows || [], res.columns || []];
+			try {
+				const res = await client.execute(sql, params || []);
+				return [res.rows || [], res.columns || []];
+			} catch (err) {
+				console.error("Turso query error:", err && err.message ? err.message : err);
+				console.error(err && err.stack ? err.stack : err);
+				throw err;
+			}
 		},
 		client,
 	};

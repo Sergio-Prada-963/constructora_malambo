@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 // Servir archivos estáticos desde la carpeta frontend
-const staticPath = path.join(__dirname, "..", "frontend");
+const staticPath = path.join(__dirname, "", "frontend");
 app.use(express.static(staticPath));
 
 // Ruta principal: enviar index.html
