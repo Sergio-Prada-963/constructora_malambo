@@ -238,10 +238,53 @@ app.post("/api/payments", async (req, res) => {
 
 	try {
 		const [paymentResult] = await pool.query("INSERT INTO payments (user_id, project_id, valor, cuotas_nro, fecha_pago, total_cuotas, intereses, aporte_capital) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [userId, projectId, valor, cuotasNro, fechaPago, totalCuotas, intereses || 0, aporteCapital || 0]);
-		const paymentId = paymentResult.insertId;
 
-		// Actualizar user_lotes: agregar paymentId a pagos_ids y restar aporteCapital de valor_restante
-		await pool.query("UPDATE user_lotes SET pagos_ids = JSON_ARRAY_APPEND(pagos_ids, '$', ?), valor_restante = valor_restante - ? WHERE id = ?", [paymentId, aporteCapital, loteId]);
+		// Normalize insert id between mysql2 result and libsql result
+		let paymentId = null;
+		if (paymentResult && typeof paymentResult.insertId !== 'undefined') {
+			paymentId = paymentResult.insertId;
+		} else {
+			const [payIdRows] = await pool.query("SELECT last_insert_rowid() AS id");
+			if (payIdRows && payIdRows[0] && typeof payIdRows[0].id !== 'undefined') paymentId = payIdRows[0].id;
+		}
+
+		console.log(`Registered paymentId=${paymentId} for user=${userId} project=${projectId} lote=${loteId} valor=${valor}`);
+
+		// Actualizar user_lotes: leer pagos_ids, añadir paymentId y recalcular valor_restante a partir de pagos
+		try {
+			const [loteRows] = await pool.query("SELECT pagos_ids, valor_total FROM user_lotes WHERE id = ?", [loteId]);
+			let pagos = [];
+			let valorTotalLote = null;
+			if (loteRows && loteRows[0]) {
+				valorTotalLote = loteRows[0].valor_total;
+				if (loteRows[0].pagos_ids) {
+					try {
+						pagos = JSON.parse(loteRows[0].pagos_ids);
+						if (!Array.isArray(pagos)) pagos = [];
+					} catch (e) {
+						pagos = [];
+					}
+				}
+			}
+			pagos.push(paymentId);
+
+			// Obtener pagos reales desde la tabla payments para sumar aporte_capital
+			let totalPagado = 0;
+			if (pagos.length > 0) {
+				const placeholders = pagos.map(() => '?').join(',');
+				const [payRows] = await pool.query(`SELECT aporte_capital FROM payments WHERE id IN (${placeholders})`, pagos);
+				for (const pr of payRows) {
+					totalPagado += Number(pr.aporte_capital || 0);
+				}
+			}
+
+			const valorRestante = (typeof valorTotalLote === 'number' ? valorTotalLote : Number(valorTotalLote || 0)) - totalPagado;
+			const remaining = valorRestante > 0 ? valorRestante : 0;
+
+			await pool.query("UPDATE user_lotes SET pagos_ids = ?, valor_restante = ? WHERE id = ?", [JSON.stringify(pagos), remaining, loteId]);
+		} catch (e) {
+			console.error('Error actualizando user_lotes pagos_ids:', e && e.message ? e.message : e);
+		}
 
 		res.json({ success: true, message: "Pago registrado correctamente" });
 	} catch (err) {
@@ -256,8 +299,43 @@ app.get("/api/user-lotes", async (req, res) => {
 	if (!userId) return res.status(400).json({ success: false, message: "userId requerido" });
 
 	try {
-		const [rows] = await pool.query("SELECT * FROM user_lotes WHERE user_id = ? ORDER BY fecha_compra DESC", [userId]);
-		res.json({ success: true, lotes: rows });
+		// By default, exclude fully paid lots. Pass includePaid=true to include them.
+		const includePaid = req.query.includePaid === 'true';
+		let rows;
+		if (includePaid) {
+			[rows] = await pool.query("SELECT * FROM user_lotes WHERE user_id = ? ORDER BY fecha_compra DESC", [userId]);
+		} else {
+			[rows] = await pool.query("SELECT * FROM user_lotes WHERE user_id = ? AND (valor_restante IS NULL OR valor_restante > 0) ORDER BY fecha_compra DESC", [userId]);
+		}
+
+		// Augment each lote with computed totals: pagos_count, total_pagado, valor_restante_computed, paid boolean
+		const augmented = [];
+		for (const lote of rows) {
+			let pagos = [];
+			if (lote.pagos_ids) {
+				try {
+					pagos = JSON.parse(lote.pagos_ids);
+					if (!Array.isArray(pagos)) pagos = [];
+				} catch (e) {
+					pagos = [];
+				}
+			}
+
+			let totalPagado = 0;
+			if (pagos.length > 0) {
+				const placeholders = pagos.map(() => '?').join(',');
+				const [payRows] = await pool.query(`SELECT aporte_capital FROM payments WHERE id IN (${placeholders})`, pagos);
+				for (const pr of payRows) totalPagado += Number(pr.aporte_capital || 0);
+			}
+
+			const valorTotal = Number(lote.valor_total || 0);
+			const valorRestanteComputed = Math.max(0, valorTotal - totalPagado);
+			const paid = valorRestanteComputed <= 0;
+
+			augmented.push({ ...lote, pagos_count: pagos.length, total_pagado: totalPagado, valor_restante_computed: valorRestanteComputed, paid });
+		}
+
+		res.json({ success: true, lotes: augmented });
 	} catch (err) {
 		console.error("Get user-lotes error:", err.message || err);
 		res.status(500).json({ success: false, message: "Error del servidor" });
@@ -275,9 +353,18 @@ app.post("/api/buy-project", async (req, res) => {
 		if (!projectRows || projectRows.length === 0) return res.status(404).json({ success: false, message: "Proyecto no encontrado" });
 		const loteName = projectRows[0].nombre;
 
-		// Insertar en user_lotes
-		const [insertResult] = await pool.query("INSERT INTO user_lotes (user_id, project_id, lote_name, valor_total, cuotas_total, valor_cuota, valor_restante, pagos_ids) VALUES (?, ?, ?, ?, ?, ?, ?, '[]')", [userId, projectId, loteName, valorTotal, cuotas, valorCuota, valorTotal]);
-		const userLoteId = insertResult.insertId;
+		// Insertar en user_lotes (incluyendo numero_cuotas y un pagos_ids vacío como JSON string)
+		const fechaCompra = new Date().toISOString().split("T")[0];
+		const [insertResult] = await pool.query("INSERT INTO user_lotes (user_id, project_id, lote_name, fecha_compra, numero_cuotas, pagos_ids, valor_total, cuotas_total, valor_cuota, valor_restante) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [userId, projectId, loteName, fechaCompra, cuotas, JSON.stringify([]), valorTotal, cuotas, valorCuota, valorTotal]);
+
+		// Normalize insert id between mysql2 result and libsql result
+		let userLoteId = null;
+		if (insertResult && typeof insertResult.insertId !== "undefined") {
+			userLoteId = insertResult.insertId;
+		} else {
+			const [idRows] = await pool.query("SELECT last_insert_rowid() AS id");
+			if (idRows && idRows[0] && typeof idRows[0].id !== "undefined") userLoteId = idRows[0].id;
+		}
 
 		// Calcular intereses y aporte para el primer pago
 		const intereses = valorCuota * 0.12;
@@ -286,10 +373,31 @@ app.post("/api/buy-project", async (req, res) => {
 
 		// Insertar primer pago
 		const [paymentResult] = await pool.query("INSERT INTO payments (user_id, project_id, valor, cuotas_nro, fecha_pago, total_cuotas, intereses, aporte_capital) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [userId, projectId, valorCuota, 1, fechaPago, cuotas, intereses, aporteCapital]);
-		const paymentId = paymentResult.insertId;
 
-		// Actualizar user_lotes con pagos_ids
-		await pool.query("UPDATE user_lotes SET pagos_ids = JSON_ARRAY(?) WHERE id = ?", [[paymentId], userLoteId]);
+		let paymentId = null;
+		if (paymentResult && typeof paymentResult.insertId !== "undefined") {
+			paymentId = paymentResult.insertId;
+		} else {
+			const [payIdRows] = await pool.query("SELECT last_insert_rowid() AS id");
+			if (payIdRows && payIdRows[0] && typeof payIdRows[0].id !== "undefined") paymentId = payIdRows[0].id;
+		}
+
+		// Actualizar user_lotes con pagos_ids (esquema Turso/SQLite almacena JSON como texto)
+		// Recalculate valor_restante based on payments (include the first payment)
+		try {
+			const pagos = [paymentId];
+			let totalPagado = 0;
+			if (pagos.length > 0) {
+				const placeholders = pagos.map(() => '?').join(',');
+				const [payRows] = await pool.query(`SELECT aporte_capital FROM payments WHERE id IN (${placeholders})`, pagos);
+				for (const pr of payRows) totalPagado += Number(pr.aporte_capital || 0);
+			}
+			const valorTotalNum = Number(valorTotal || 0);
+			const remaining = Math.max(0, valorTotalNum - totalPagado);
+			await pool.query("UPDATE user_lotes SET pagos_ids = ?, valor_restante = ? WHERE id = ?", [JSON.stringify(pagos), remaining, userLoteId]);
+		} catch (e) {
+			console.error('Error actualizando valor_restante tras compra:', e && e.message ? e.message : e);
+		}
 
 		res.json({ success: true, message: "Compra realizada correctamente" });
 	} catch (err) {

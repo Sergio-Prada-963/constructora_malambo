@@ -152,35 +152,110 @@
 			.popup {
 				display: none;
 				position: fixed;
+				inset: 0;
 				z-index: 10000;
-				left: 0;
-				top: 0;
-				width: 100%;
-				height: 100%;
-				background-color: rgba(0, 0, 0, 0.5);
+				background: rgba(10, 12, 16, 0.6);
+				backdrop-filter: blur(3px);
+				padding: 24px;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.popup.open {
+				display: flex;
 			}
 
 			.popup-content {
-				background-color: white;
-				margin: 15% auto;
-				padding: 20px;
-				border: 1px solid #888;
-				width: 80%;
-				max-width: 500px;
-				border-radius: 10px;
+				background-color: #ffffff;
+				width: 100%;
+				max-width: 520px;
+				border-radius: 12px;
+				padding: 22px;
+				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
 				position: relative;
+				transform: translateY(-8px);
+				opacity: 0;
+				transition:
+					transform 220ms ease,
+					opacity 220ms ease;
+			}
+
+			.popup.open .popup-content {
+				transform: translateY(0);
+				opacity: 1;
+			}
+
+			.popup-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 12px;
+			}
+
+			.popup-header h2 {
+				margin: 0;
+				font-size: 20px;
+				color: #1a1f2b;
 			}
 
 			.close {
-				color: #aaa;
-				float: right;
-				font-size: 28px;
-				font-weight: bold;
+				position: absolute;
+				top: 12px;
+				right: 12px;
+				width: 36px;
+				height: 36px;
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: #f3f4f6;
+				color: #555;
+				font-size: 20px;
 				cursor: pointer;
+				border: none;
 			}
 
 			.close:hover {
-				color: black;
+				background: #e6e7e9;
+				color: #111;
+			}
+
+			.input-group {
+				margin-bottom: 12px;
+			}
+
+			.input-group label {
+				display: block;
+				margin-bottom: 6px;
+				color: #445;
+				font-weight: 600;
+				font-size: 13px;
+			}
+
+			.input-group input,
+			.input-group select {
+				width: 100%;
+				padding: 10px 12px;
+				border-radius: 8px;
+				border: 1px solid #e6e7eb;
+				font-size: 14px;
+				background: #fff;
+			}
+
+			.btn {
+				display: inline-block;
+				background: #1a1f2b;
+				color: #fff;
+				padding: 10px 14px;
+				border-radius: 8px;
+				border: none;
+				cursor: pointer;
+				font-weight: 600;
+			}
+
+			.btn:hover {
+				background: #d4a039;
+				color: #0b0b0b;
 			}
 
 			/* BOTÓN FLOTANTE */
@@ -348,17 +423,22 @@
 							<div class="card-content">
 								<h3>${p.nombre}</h3>
 								<p>${p.descripcion || ""}</p>
-								<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
-									<span style="font-weight:700;color:#d4a039">$${Number(p.precio).toLocaleString()}</span>
-									<div>
-										<span style="background:#eef2ff;color:#1a1f2b;padding:6px 8px;border-radius:8px;margin-right:8px;font-size:13px">${p.etapa || ""}</span>
-										<button class="btn" onclick="openBuyPopup(${p.id}, ${JSON.stringify(p.nombre)}, ${p.precio})">Comprar</button>
-										<a class="btn" href="/project-edit.html?id=${p.id}">Editar</a>
+									<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+										<span style="font-weight:700;color:#d4a039">$${Number(p.precio).toLocaleString()}</span>
+										<div>
+											<span style="background:#eef2ff;color:#1a1f2b;padding:6px 8px;border-radius:8px;margin-right:8px;font-size:13px">${p.etapa || ""}</span>
+											<button class="btn">Comprar</button>
+											<a class="btn" href="/project-edit.html?id=${p.id}">Editar</a>
+										</div>
 									</div>
-								</div>
 							</div>
 						`;
 						grid.appendChild(card);
+						// Attach event listener to the Comprar button to avoid issues with quotes in project names
+						const buyBtn = card.querySelector("button.btn");
+						if (buyBtn) {
+							buyBtn.addEventListener("click", () => openBuyPopup(p.id, p.nombre, p.precio));
+						}
 					});
 				} catch (err) {
 					console.error(err);
@@ -376,11 +456,11 @@
 				document.getElementById("buyProjectValue").value = value;
 				document.getElementById("buyCuotas").value = 1;
 				calculateMonthly();
-				document.getElementById("buyPopup").style.display = "block";
+				document.getElementById("buyPopup").classList.add("open");
 			}
 
 			function closeBuyPopup() {
-				document.getElementById("buyPopup").style.display = "none";
+				document.getElementById("buyPopup").classList.remove("open");
 			}
 
 			function calculateMonthly() {

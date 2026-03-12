@@ -184,6 +184,10 @@
 					</select>
 					<input type="hidden" id="realProjectId" />
 				</div>
+				<!-- Hidden fields required by the script -->
+				<input type="hidden" id="totalCuotas" />
+				<input type="hidden" id="cuotasNro" />
+				<input type="date" id="fechaPago" style="display: none" />
 				<div class="input-group">
 					<label>Valor del Pago</label>
 					<input type="number" id="valor" step="0.01" placeholder="Ej: 500000.00" required oninput="calculateFields()" />

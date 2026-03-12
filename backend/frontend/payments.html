@@ -280,6 +280,7 @@
 							<p><strong>Cuota:</strong> ${payment.cuotas_nro} de ${payment.total_cuotas}</p>
 							<p><strong>Fecha:</strong> ${new Date(payment.fecha_pago).toLocaleDateString()}</p>
 							<button onclick="showDetails(${payment.id})">Ver Detalles</button>
+							<button onclick="printVoucher(${payment.id})" style="margin-left:8px;background:#d4a039;color:#111">Imprimir boucher</button>
 						</div>
 					`;
 					grid.appendChild(card);
@@ -312,6 +313,56 @@
 					.catch((error) => {
 						console.error("Error:", error);
 					});
+			}
+
+			async function printVoucher(paymentId) {
+				try {
+					const resp = await fetch(`/api/payments?userId=${userId}`);
+					const data = await resp.json();
+					if (!data.success) return alert('No se pudo obtener el pago');
+					const payment = data.payments.find((p) => p.id == paymentId);
+					if (!payment) return alert('Pago no encontrado');
+
+					// intentar obtener nombre del proyecto
+					let projectName = payment.project_id;
+					try {
+						const pResp = await fetch(`/api/projects/${payment.project_id}`);
+						const pData = await pResp.json();
+						if (pData.success && pData.project) projectName = pData.project.nombre;
+					} catch (e) {
+						// ignore
+					}
+
+					const win = window.open('', '_blank');
+					const html = `<!doctype html><html><head><meta charset="utf-8"><title>Boucher Pago #${payment.id}</title><style>
+						body{font-family:Arial,Helvetica,sans-serif;padding:24px;color:#222}
+						.header{display:flex;justify-content:space-between;align-items:center}
+						.logo{font-weight:700;color:#1a1f2b}
+						.card{border:1px solid #e6e7eb;padding:18px;border-radius:8px;margin-top:18px}
+						.row{display:flex;justify-content:space-between;margin-bottom:8px}
+						.label{color:#555}
+						.amount{font-weight:700;color:#1a1f2b}
+						@media print{button{display:none}}</style></head><body>
+						<div class="header"><div class="logo">Constructora Malambo</div><div>${new Date(payment.fecha_pago).toLocaleDateString()}</div></div>
+						<h2>Boucher de Pago</h2>
+						<div class="card">
+							<div class="row"><div class="label">Pago ID</div><div>#${payment.id}</div></div>
+							<div class="row"><div class="label">Proyecto</div><div>${projectName}</div></div>
+							<div class="row"><div class="label">Valor pagado</div><div class="amount">$${Number(payment.valor).toLocaleString()}</div></div>
+							<div class="row"><div class="label">Cuota</div><div>${payment.cuotas_nro} / ${payment.total_cuotas}</div></div>
+							<div class="row"><div class="label">Intereses</div><div>$${Number(payment.intereses || 0).toLocaleString()}</div></div>
+							<div class="row"><div class="label">Aporte a capital</div><div>$${Number(payment.aporte_capital || 0).toLocaleString()}</div></div>
+							<div style="margin-top:12px;color:#666;font-size:13px">Gracias por su pago.</div>
+						</div>
+						<div style="margin-top:18px"><button onclick="window.print();">Imprimir</button></div>
+					</body></html>`;
+					win.document.open();
+					win.document.write(html);
+					win.document.close();
+				} catch (err) {
+					console.error('Print voucher error:', err);
+					alert('Error generando boucher');
+				}
 			}
 
 			function closeModal() {
