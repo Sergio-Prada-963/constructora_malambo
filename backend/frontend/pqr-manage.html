@@ -1,71 +1,123 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Gestionar PQR - Constructora Malambo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
-    <style>
-      body{font-family:Poppins, sans-serif;margin:0;color:#2f3a4d}
-      header{background:#1a1f2b;color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center}
-      .container{padding:28px;max-width:900px;margin:0 auto}
-      .card{background:#fff;padding:16px;border-radius:8px;margin-bottom:12px;box-shadow:0 8px 20px rgba(0,0,0,0.06)}
-      textarea{width:100%;min-height:100px;padding:8px;border-radius:6px;border:1px solid #ddd}
-      .btn{background:#1a1f2b;color:#fff;padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>Gestionar PQR</h1>
-      <nav><a href="/dashboard.html" style="color:#fff;text-decoration:none">Volver</a></nav>
-    </header>
-    <div class="container">
-      <h2>Listado de PQRs</h2>
-      <div id="list"></div>
-    </div>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Gestionar PQR - Constructora Malambo</title>
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+		<style>
+			body {
+				font-family: Poppins, sans-serif;
+				margin: 0;
+				color: #2f3a4d;
+			}
+			header {
+				background: #1a1f2b;
+				color: #fff;
+				padding: 18px 28px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			.container {
+				padding: 28px;
+				max-width: 900px;
+				margin: 0 auto;
+			}
+			.card {
+				background: #fff;
+				padding: 16px;
+				border-radius: 8px;
+				margin-bottom: 12px;
+				box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+			}
+			textarea {
+				width: 100%;
+				min-height: 100px;
+				padding: 8px;
+				border-radius: 6px;
+				border: 1px solid #ddd;
+			}
+			.btn {
+				background: #1a1f2b;
+				color: #fff;
+				padding: 8px 12px;
+				border-radius: 6px;
+				border: none;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>Gestionar PQR</h1>
+			<nav><a href="/dashboard.html" style="color: #fff; text-decoration: none">Volver</a></nav>
+		</header>
+		<div class="container">
+			<h2>Listado de PQRs</h2>
+			<div id="list"></div>
+		</div>
 
-    <script>
-      const userId = localStorage.getItem('userId');
-      if (!userId) { alert('No has iniciado sesión'); location.href='/login.html'; }
+		<script>
+			const userId = localStorage.getItem("userId");
+			if (!userId) {
+				alert("No has iniciado sesión");
+				location.href = "/login.html";
+			}
 
-      async function loadPqrs(){
-        try{
-          const res = await fetch('/api/pqrs');
-          const data = await res.json();
-          if(!data.success) return document.getElementById('list').innerText = 'Error cargando PQRs';
-          const list = document.getElementById('list'); list.innerHTML='';
-          data.pqrs.forEach(p => {
-            const el = document.createElement('div'); el.className='card';
-            el.innerHTML = `<strong>${p.consecutivo || 'PQR-'+p.id}</strong> <small style="float:right">${p.tipo_pqr} - ${p.estado}</small>
-              <div style="margin-top:8px"><b>Usuario:</b> ${p.usuario_id || 'N/A'}</div>
-              <div style="margin-top:8px"><b>Nombre:</b> ${p.nombre || ''}</div>
-              <div style="margin-top:8px"><b>Descripción:</b> ${p.descripcion || ''}</div>
+			async function loadPqrs() {
+				try {
+					const res = await fetch("/api/pqrs");
+					const data = await res.json();
+					if (!data.success) return (document.getElementById("list").innerText = "Error cargando PQRs");
+					const list = document.getElementById("list");
+					list.innerHTML = "";
+					data.pqrs.forEach((p) => {
+						const el = document.createElement("div");
+						el.className = "card";
+						el.innerHTML = `<strong>${p.consecutivo || "PQR-" + p.id}</strong> <small style="float:right">${p.tipo_pqr} - ${p.estado}</small>
+              <div style="margin-top:8px"><b>Usuario:</b> ${p.usuario_id || "N/A"}</div>
+              <div style="margin-top:8px"><b>Nombre:</b> ${p.nombre || ""}</div>
+              <div style="margin-top:8px"><b>Descripción:</b> ${p.descripcion || ""}</div>
               <div style="margin-top:8px"><b>Respuesta:</b></div>
-              <textarea id="resp-${p.id}">${p.respuesta || ''}</textarea>
+              <textarea id="resp-${p.id}">${p.respuesta || ""}</textarea>
               <div style="margin-top:8px;display:flex;gap:8px"><button class="btn" onclick="save(${p.id})">Guardar respuesta</button><button class="btn" style="background:#666" onclick="setEstado(${p.id}, 'respondida')">Marcar respondida</button></div>`;
-            list.appendChild(el);
-          });
-        }catch(e){console.error(e); document.getElementById('list').innerText='Error de conexión';}
-      }
+						list.appendChild(el);
+					});
+				} catch (e) {
+					console.error(e);
+					document.getElementById("list").innerText = "Error de conexión";
+				}
+			}
 
-      async function save(id){
-        const text = document.getElementById('resp-'+id).value;
-        try{
-          const res = await fetch('/api/pqrs/'+id, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ respuesta: text })});
-          const data = await res.json();
-          if(data.success) alert('Respuesta guardada'); else alert(data.message||'Error');
-        }catch(e){console.error(e); alert('Error de conexión');}
-      }
+			async function save(id) {
+				const text = document.getElementById("resp-" + id).value;
+				try {
+					const res = await fetch("/api/pqrs/" + id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ respuesta: text }) });
+					const data = await res.json();
+					if (data.success) alert("Respuesta guardada");
+					else alert(data.message || "Error");
+				} catch (e) {
+					console.error(e);
+					alert("Error de conexión");
+				}
+			}
 
-      async function setEstado(id, estado){
-        try{
-          const res = await fetch('/api/pqrs/'+id, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ estado })});
-          const data = await res.json();
-          if(data.success) { alert('Estado actualizado'); loadPqrs(); } else alert(data.message||'Error');
-        }catch(e){console.error(e); alert('Error de conexión');}
-      }
+			async function setEstado(id, estado) {
+				try {
+					const res = await fetch("/api/pqrs/" + id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ estado }) });
+					const data = await res.json();
+					if (data.success) {
+						alert("Estado actualizado");
+						loadPqrs();
+					} else alert(data.message || "Error");
+				} catch (e) {
+					console.error(e);
+					alert("Error de conexión");
+				}
+			}
 
-      window.addEventListener('DOMContentLoaded', loadPqrs);
-    </script>
-  </body>
+			window.addEventListener("DOMContentLoaded", loadPqrs);
+		</script>
+	</body>
 </html>

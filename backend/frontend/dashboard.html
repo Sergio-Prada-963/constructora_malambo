@@ -465,15 +465,15 @@
 				if (!isAdmin && fab) fab.style.display = "none";
 				// Add admin-only nav link for PQR management
 				try {
-					const nav = document.querySelector('header nav');
+					const nav = document.querySelector("header nav");
 					if (isAdmin && nav) {
-						const a = document.createElement('a');
-						a.href = '/pqr-manage.html';
-						a.innerText = 'Gestionar PQR';
+						const a = document.createElement("a");
+						a.href = "/pqr-manage.html";
+						a.innerText = "Gestionar PQR";
 						nav.insertBefore(a, nav.lastElementChild); // insert before 'Cerrar Sesión'
 					}
 				} catch (e) {
-					console.error('Error adding admin nav link', e);
+					console.error("Error adding admin nav link", e);
 				}
 				loadProjectsDashboard(isAdmin);
 			});

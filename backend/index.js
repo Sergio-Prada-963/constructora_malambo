@@ -80,27 +80,27 @@ app.put("/api/pqrs/:id", async (req, res) => {
 	const id = Number(req.params.id || 0);
 	if (!id) return res.status(400).json({ success: false, message: "ID inválido" });
 	const { respuesta, estado } = req.body || {};
-	if (typeof respuesta === 'undefined' && typeof estado === 'undefined') return res.status(400).json({ success: false, message: "Nada para actualizar" });
+	if (typeof respuesta === "undefined" && typeof estado === "undefined") return res.status(400).json({ success: false, message: "Nada para actualizar" });
 
 	const updates = [];
 	const values = [];
-	if (typeof respuesta !== 'undefined') {
-		updates.push('respuesta = ?');
+	if (typeof respuesta !== "undefined") {
+		updates.push("respuesta = ?");
 		values.push(respuesta);
 	}
-	if (typeof estado !== 'undefined') {
-		updates.push('estado = ?');
+	if (typeof estado !== "undefined") {
+		updates.push("estado = ?");
 		values.push(estado);
 	}
 	values.push(id);
 
 	try {
-		const sql = `UPDATE pqr SET ${updates.join(', ')} WHERE id = ?`;
+		const sql = `UPDATE pqr SET ${updates.join(", ")} WHERE id = ?`;
 		await pool.query(sql, values);
-		res.json({ success: true, message: 'PQR actualizada' });
+		res.json({ success: true, message: "PQR actualizada" });
 	} catch (err) {
-		console.error('Update PQR error:', err && err.message ? err.message : err);
-		res.status(500).json({ success: false, message: 'Error actualizando PQR' });
+		console.error("Update PQR error:", err && err.message ? err.message : err);
+		res.status(500).json({ success: false, message: "Error actualizando PQR" });
 	}
 });
 
@@ -270,11 +270,11 @@ app.post("/api/payments", async (req, res) => {
 
 		// Normalize insert id between mysql2 result and libsql result
 		let paymentId = null;
-		if (paymentResult && typeof paymentResult.insertId !== 'undefined') {
+		if (paymentResult && typeof paymentResult.insertId !== "undefined") {
 			paymentId = paymentResult.insertId;
 		} else {
 			const [payIdRows] = await pool.query("SELECT last_insert_rowid() AS id");
-			if (payIdRows && payIdRows[0] && typeof payIdRows[0].id !== 'undefined') paymentId = payIdRows[0].id;
+			if (payIdRows && payIdRows[0] && typeof payIdRows[0].id !== "undefined") paymentId = payIdRows[0].id;
 		}
 
 		console.log(`Registered paymentId=${paymentId} for user=${userId} project=${projectId} lote=${loteId} valor=${valor}`);
@@ -300,19 +300,19 @@ app.post("/api/payments", async (req, res) => {
 			// Obtener pagos reales desde la tabla payments para sumar aporte_capital
 			let totalPagado = 0;
 			if (pagos.length > 0) {
-				const placeholders = pagos.map(() => '?').join(',');
+				const placeholders = pagos.map(() => "?").join(",");
 				const [payRows] = await pool.query(`SELECT aporte_capital FROM payments WHERE id IN (${placeholders})`, pagos);
 				for (const pr of payRows) {
 					totalPagado += Number(pr.aporte_capital || 0);
 				}
 			}
 
-			const valorRestante = (typeof valorTotalLote === 'number' ? valorTotalLote : Number(valorTotalLote || 0)) - totalPagado;
+			const valorRestante = (typeof valorTotalLote === "number" ? valorTotalLote : Number(valorTotalLote || 0)) - totalPagado;
 			const remaining = valorRestante > 0 ? valorRestante : 0;
 
 			await pool.query("UPDATE user_lotes SET pagos_ids = ?, valor_restante = ? WHERE id = ?", [JSON.stringify(pagos), remaining, loteId]);
 		} catch (e) {
-			console.error('Error actualizando user_lotes pagos_ids:', e && e.message ? e.message : e);
+			console.error("Error actualizando user_lotes pagos_ids:", e && e.message ? e.message : e);
 		}
 
 		res.json({ success: true, message: "Pago registrado correctamente" });
@@ -329,7 +329,7 @@ app.get("/api/user-lotes", async (req, res) => {
 
 	try {
 		// By default, exclude fully paid lots. Pass includePaid=true to include them.
-		const includePaid = req.query.includePaid === 'true';
+		const includePaid = req.query.includePaid === "true";
 		let rows;
 		if (includePaid) {
 			[rows] = await pool.query("SELECT * FROM user_lotes WHERE user_id = ? ORDER BY fecha_compra DESC", [userId]);
@@ -352,7 +352,7 @@ app.get("/api/user-lotes", async (req, res) => {
 
 			let totalPagado = 0;
 			if (pagos.length > 0) {
-				const placeholders = pagos.map(() => '?').join(',');
+				const placeholders = pagos.map(() => "?").join(",");
 				const [payRows] = await pool.query(`SELECT aporte_capital FROM payments WHERE id IN (${placeholders})`, pagos);
 				for (const pr of payRows) totalPagado += Number(pr.aporte_capital || 0);
 			}
@@ -417,7 +417,7 @@ app.post("/api/buy-project", async (req, res) => {
 			const pagos = [paymentId];
 			let totalPagado = 0;
 			if (pagos.length > 0) {
-				const placeholders = pagos.map(() => '?').join(',');
+				const placeholders = pagos.map(() => "?").join(",");
 				const [payRows] = await pool.query(`SELECT aporte_capital FROM payments WHERE id IN (${placeholders})`, pagos);
 				for (const pr of payRows) totalPagado += Number(pr.aporte_capital || 0);
 			}
@@ -425,7 +425,7 @@ app.post("/api/buy-project", async (req, res) => {
 			const remaining = Math.max(0, valorTotalNum - totalPagado);
 			await pool.query("UPDATE user_lotes SET pagos_ids = ?, valor_restante = ? WHERE id = ?", [JSON.stringify(pagos), remaining, userLoteId]);
 		} catch (e) {
-			console.error('Error actualizando valor_restante tras compra:', e && e.message ? e.message : e);
+			console.error("Error actualizando valor_restante tras compra:", e && e.message ? e.message : e);
 		}
 
 		res.json({ success: true, message: "Compra realizada correctamente" });
