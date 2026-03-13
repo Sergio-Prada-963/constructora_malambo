@@ -327,7 +327,7 @@
 		</section>
 
 		<!-- BOTÓN FLOTANTE -->
-		<div class="fab" onclick="crearNuevoProyecto()"></div>
+		<div id="createFab" class="fab" onclick="crearNuevoProyecto()"></div>
 
 		<footer>© 2026 Constructora Malambo – Todos los derechos reservados</footer>
 
@@ -405,7 +405,20 @@
 			}
 
 			// Cargar proyectos dinámicamente
-			async function loadProjectsDashboard() {
+			async function getCurrentUserIsAdmin() {
+				const userId = localStorage.getItem("userId");
+				if (!userId) return false;
+				try {
+					const res = await fetch(`/api/user?userId=${userId}`);
+					const data = await res.json();
+					return Boolean(data && data.success && data.user && data.user.role === "admin");
+				} catch (e) {
+					console.error("Error fetching user role", e);
+					return false;
+				}
+			}
+
+			async function loadProjectsDashboard(isAdmin = false) {
 				try {
 					const res = await fetch("/api/projects");
 					const data = await res.json();
@@ -425,11 +438,11 @@
 								<p>${p.descripcion || ""}</p>
 									<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
 										<span style="font-weight:700;color:#d4a039">$${Number(p.precio).toLocaleString()}</span>
-										<div>
-											<span style="background:#eef2ff;color:#1a1f2b;padding:6px 8px;border-radius:8px;margin-right:8px;font-size:13px">${p.etapa || ""}</span>
-											<button class="btn">Comprar</button>
-											<a class="btn" href="/project-edit.html?id=${p.id}">Editar</a>
-										</div>
+												<div>
+													<span style="background:#eef2ff;color:#1a1f2b;padding:6px 8px;border-radius:8px;margin-right:8px;font-size:13px">${p.etapa || ""}</span>
+													<button class="btn">Comprar</button>
+													${isAdmin ? '<a class="btn" href="/project-edit.html?id=' + p.id + '">Editar</a>' : ""}
+												</div>
 									</div>
 							</div>
 						`;
@@ -446,7 +459,24 @@
 				}
 			}
 
-			window.addEventListener("DOMContentLoaded", loadProjectsDashboard);
+			window.addEventListener("DOMContentLoaded", async () => {
+				const isAdmin = await getCurrentUserIsAdmin();
+				const fab = document.getElementById("createFab");
+				if (!isAdmin && fab) fab.style.display = "none";
+				// Add admin-only nav link for PQR management
+				try {
+					const nav = document.querySelector('header nav');
+					if (isAdmin && nav) {
+						const a = document.createElement('a');
+						a.href = '/pqr-manage.html';
+						a.innerText = 'Gestionar PQR';
+						nav.insertBefore(a, nav.lastElementChild); // insert before 'Cerrar Sesión'
+					}
+				} catch (e) {
+					console.error('Error adding admin nav link', e);
+				}
+				loadProjectsDashboard(isAdmin);
+			});
 
 			let currentBuyProjectId = null;
 

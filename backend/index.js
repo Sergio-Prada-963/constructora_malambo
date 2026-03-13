@@ -66,12 +66,41 @@ app.post("/api/pqrs", async (req, res) => {
 		const consecutivo = "PQR-" + Date.now();
 		const fecha = new Date();
 		const estado = "radicad";
-		const sql = "INSERT INTO pqr (usuario_id, tipo_pqr, estado, consecutivo, fecha, nombre, descripcion) VALUES (?, ?, ?, ?, ?, ?, ?)";
-		const [result] = await pool.query(sql, [usuario_id, tipo_pqr, estado, consecutivo, fecha, nombre, descripcion]);
+		const sql = "INSERT INTO pqr (usuario_id, tipo_pqr, estado, consecutivo, fecha, nombre, descripcion, respuesta) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		const [result] = await pool.query(sql, [usuario_id, tipo_pqr, estado, consecutivo, fecha, nombre, descripcion, null]);
 		res.json({ success: true, id: result.insertId, consecutivo });
 	} catch (err) {
 		console.error("Create PQR error:", err.message || err);
 		res.status(500).json({ success: false, message: "Error creando PQR" });
+	}
+});
+
+// Actualizar PQR (respuesta / estado) - administradores
+app.put("/api/pqrs/:id", async (req, res) => {
+	const id = Number(req.params.id || 0);
+	if (!id) return res.status(400).json({ success: false, message: "ID inválido" });
+	const { respuesta, estado } = req.body || {};
+	if (typeof respuesta === 'undefined' && typeof estado === 'undefined') return res.status(400).json({ success: false, message: "Nada para actualizar" });
+
+	const updates = [];
+	const values = [];
+	if (typeof respuesta !== 'undefined') {
+		updates.push('respuesta = ?');
+		values.push(respuesta);
+	}
+	if (typeof estado !== 'undefined') {
+		updates.push('estado = ?');
+		values.push(estado);
+	}
+	values.push(id);
+
+	try {
+		const sql = `UPDATE pqr SET ${updates.join(', ')} WHERE id = ?`;
+		await pool.query(sql, values);
+		res.json({ success: true, message: 'PQR actualizada' });
+	} catch (err) {
+		console.error('Update PQR error:', err && err.message ? err.message : err);
+		res.status(500).json({ success: false, message: 'Error actualizando PQR' });
 	}
 });
 

@@ -185,7 +185,28 @@
 				}
 			});
 
-			window.addEventListener("DOMContentLoaded", loadProject);
+			async function getCurrentUserIsAdmin() {
+				const userId = localStorage.getItem("userId");
+				if (!userId) return false;
+				try {
+					const res = await fetch(`/api/user?userId=${userId}`);
+					const data = await res.json();
+					return Boolean(data && data.success && data.user && data.user.role === "admin");
+				} catch (e) {
+					console.error("Error fetching user role", e);
+					return false;
+				}
+			}
+
+			window.addEventListener("DOMContentLoaded", async () => {
+				const isAdmin = await getCurrentUserIsAdmin();
+				if (!isAdmin) {
+					alert("No tienes permisos para editar proyectos");
+					location.href = "/dashboard.html";
+					return;
+				}
+				loadProject();
+			});
 		</script>
 	</body>
 </html>
